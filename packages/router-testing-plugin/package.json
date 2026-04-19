@@ -1,0 +1,39 @@
+{
+  "name": "@tanstack-router-testing/router-testing-plugin",
+  "version": "0.0.0",
+  "description": "Compatibility package for the TanStack Start testing Vite/Vitest plugin.",
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test:unit": "vitest run --passWithNoTests",
+    "test:types": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@tanstack-router-testing/react-start-testing": "workspace:*",
+    "@tanstack/router-plugin": "1.167.22"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260419.1",
+    "tsdown": "0.21.9",
+    "vite": "8.0.8",
+    "vitest": "4.1.4"
+  },
+  "peerDependencies": {
+    "vite": "^7.0.0 || ^8.0.0",
+    "vitest": "^3.0.0 || ^4.0.0"
+  }
+}

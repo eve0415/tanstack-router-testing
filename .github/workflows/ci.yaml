@@ -1,0 +1,58 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: build · lint · test · types
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Lint + format check
+        run: pnpm run lint:check
+
+      - name: Core unit tests
+        run: pnpm run test:unit:core
+
+      - name: Vendored parity
+        run: pnpm run test:vendored:parity
+
+      - name: Vendored examples
+        run: pnpm run test:unit:vendored:examples
+
+      - name: Vendored React Router e2e apps
+        run: pnpm run test:unit:vendored:e2e-router
+
+      - name: Vendored React Start e2e apps
+        run: pnpm run test:unit:vendored:e2e-start
+
+      - name: Type tests
+        run: pnpm run test:types

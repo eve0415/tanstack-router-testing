@@ -20,6 +20,7 @@ worker-configuration.d.ts
 # Testing
 coverage/
 test-results/
+vendor/**/src/routeTree.gen.ts
 
 # Logs
 *.log
@@ -30,4 +31,3 @@ test-results/
 
 # Claude
 .claude/settings.local.json
-docs/

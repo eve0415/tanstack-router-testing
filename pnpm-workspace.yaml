@@ -1,0 +1,10 @@
+linkWorkspacePackages: true
+preferWorkspacePackages: true
+
+# Vendored apps under vendor/ are intentionally NOT in the workspace:
+# they reference upstream TanStack packages via `workspace:*` that don't
+# exist here. Each vendored app resolves its own deps on-demand when the
+# harness targets it. See vendor/VENDOR.md.
+packages:
+  - "packages/*"
+  - "!**/node_modules/**"
