@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+
+# Wrangler
+.wrangler/
+worker-configuration.d.ts
+.dev.vars
+
+# Environment
+.env
+.env.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+test-results/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/settings.local.json
+docs/
