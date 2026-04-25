@@ -9,7 +9,13 @@
     "directory": "packages/react-router-testing"
   },
   "author": "eve0415",
-  "keywords": ["tanstack", "router", "react", "testing", "vitest"],
+  "keywords": [
+    "tanstack",
+    "router",
+    "react",
+    "testing",
+    "vitest"
+  ],
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
@@ -41,6 +47,7 @@
   "devDependencies": {
     "@tanstack-router-testing/react-start-testing": "workspace:*",
     "@tanstack-router-testing/router-testing-core": "workspace:*",
+    "@tanstack/react-query": "5.100.1",
     "@tanstack/react-router": "1.168.24",
     "@testing-library/react": "16.3.2",
     "@types/react": "19.2.14",
@@ -53,8 +60,14 @@
     "vitest": "4.1.5"
   },
   "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-router": "^1.168.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-query": {
+      "optional": true
+    }
   }
 }

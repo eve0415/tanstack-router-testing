@@ -8,6 +8,20 @@ import { RouterProvider } from '@tanstack/react-router';
 
 import { createTestRouter } from './createTestRouter.ts';
 
+let _QueryClientProvider: ComponentType<{ client: object; children: ReactElement }> | undefined;
+const resolveQueryClientProvider = async (): Promise<void> => {
+  if (_QueryClientProvider) return;
+  try {
+    const mod = await import('@tanstack/react-query');
+    _QueryClientProvider = mod.QueryClientProvider as ComponentType<{ client: object; children: ReactElement }>;
+  } catch {
+    throw new Error(
+      '[tanstack-router-testing] queryClient option requires @tanstack/react-query. ' +
+        'Install it: pnpm add -D @tanstack/react-query',
+    );
+  }
+};
+
 export type RouteMatchTarget = string | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
 
 export interface RouterHarness<TRouter extends AnyRouter> {
@@ -41,11 +55,19 @@ export const createRouterHarness = <
   TDefaultStructural extends boolean = false,
   TDehydrated extends Record<string, unknown> = Record<string, unknown>,
 >(
-  options: CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated>,
+  options: CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated> & {
+    readonly queryClient?: object;
+  },
 ): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>> => {
-  const router = createTestRouter(options);
+  const { queryClient, ...routerOptions } = options;
+  const router = createTestRouter(routerOptions as CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated>);
 
-  const TestRouterProvider = (): ReactElement => <RouterProvider router={router} />;
+  const TestRouterProvider = (): ReactElement => {
+    const provider = <RouterProvider router={router} />;
+    if (!queryClient || !_QueryClientProvider) return provider;
+    const QCP = _QueryClientProvider;
+    return <QCP client={queryClient}>{provider}</QCP>;
+  };
 
   const findMatch = (target: RouteMatchTarget): AnyRouteMatch | undefined => {
     const routeId = getRouteId(target);
@@ -56,7 +78,10 @@ export const createRouterHarness = <
   return {
     router,
     TestRouterProvider,
-    load: () => router.load(),
+    load: async () => {
+      if (queryClient) await resolveQueryClientProvider();
+      await router.load();
+    },
     navigate: options => router.navigate(options).then(() => undefined),
     preload: options => router.preloadRoute(options) as Promise<readonly AnyRouteMatch[] | undefined>,
     match: href => {

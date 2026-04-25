@@ -9,6 +9,7 @@
  */
 
 import { createMemoryHistory } from '@tanstack/history';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Outlet, createRootRoute, createRoute, redirect } from '@tanstack/react-router';
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -203,5 +204,22 @@ describe('react-router-testing harness integration', () => {
 
     expect(harness.getParams(postRoute)).toEqual({ postId: '99' });
     expect(harness.getLoaderData('/posts/$postId')).toStrictEqual({ post: { id: '99', title: 'Post 99' } });
+  });
+
+  it('wraps in QueryClientProvider when queryClient is provided', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const root = createRootRoute({
+      component: () => {
+        const qc = useQueryClient();
+        return <div data-testid="has-query">{qc ? 'yes' : 'no'}</div>;
+      },
+    });
+    const tree = root.addChildren([]);
+    const harness = createRouterHarness({ routeTree: tree, queryClient });
+    await harness.load();
+    const { getByTestId } = render(<harness.TestRouterProvider />);
+    expect(getByTestId('has-query').textContent).toBe('yes');
+    harness.cleanup();
+    queryClient.clear();
   });
 });
