@@ -5,6 +5,7 @@
  * calls them. This package only exposes mock and environment controls.
  */
 
+export { type CallMiddlewareOptions, type CallMiddlewareResult, callMiddleware } from '@tanstack-router-testing/router-testing-core';
 export { clearStartMocks } from './clearStartMocks.ts';
 export { type AnyServerFn, mockServerFn, type ServerFnMock } from './mockServerFn.ts';
 export { type MockMiddlewareOptions, mockMiddleware } from './mockMiddleware.ts';
