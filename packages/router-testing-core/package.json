@@ -1,8 +1,15 @@
 {
   "name": "@tanstack-router-testing/router-testing-core",
   "version": "0.0.0",
-  "private": true,
   "description": "Internal runtime primitives for TanStack Router/Start test harnesses.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eve0415/tanstack-router-testing.git",
+    "directory": "packages/router-testing-core"
+  },
+  "author": "eve0415",
+  "keywords": ["tanstack", "router", "testing", "vitest"],
   "files": [
     "dist",
     "!**/*.tsbuildinfo"

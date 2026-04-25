@@ -2,6 +2,14 @@
   "name": "@tanstack-router-testing/react-router-testing",
   "version": "0.0.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-router: createTestRouter and createRouterHarness.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eve0415/tanstack-router-testing.git",
+    "directory": "packages/react-router-testing"
+  },
+  "author": "eve0415",
+  "keywords": ["tanstack", "router", "react", "testing", "vitest"],
   "files": [
     "dist",
     "!**/*.tsbuildinfo"

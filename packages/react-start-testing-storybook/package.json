@@ -2,6 +2,14 @@
   "name": "@tanstack-router-testing/react-start-testing-storybook",
   "version": "0.0.0",
   "description": "Storybook decorator for TanStack Start: wire CSF3 story parameters through createTestRouter + mockServerFn.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eve0415/tanstack-router-testing.git",
+    "directory": "packages/react-start-testing-storybook"
+  },
+  "author": "eve0415",
+  "keywords": ["tanstack", "start", "storybook", "testing", "decorator"],
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
