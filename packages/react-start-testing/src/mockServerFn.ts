@@ -58,7 +58,7 @@ const toCallableOptions = (ctx: unknown): unknown => {
  *
  * @example
  * ```ts
- * import { createServerFn } from '@tanstack/start';
+ * import { createServerFn } from '@tanstack/react-start';
  * import { mockServerFn } from '@tanstack-router-testing/react-start-testing';
  *
  * const listOrders = createServerFn()

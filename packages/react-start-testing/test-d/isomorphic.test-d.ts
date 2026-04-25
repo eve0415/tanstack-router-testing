@@ -29,7 +29,7 @@ mockServerFn(listOrders, ({ data }) => Promise.resolve([{ id: String(data.page) 
 const runtimePromise = createStartTestRuntime({
   request: 'http://tanstack-router-testing.test/orders',
 });
-runtimePromise.then(runtime => {
+void runtimePromise.then(runtime => {
   const value: Promise<number> = runtime.run(() => 1);
   void value;
   const called: Promise<{ id: number }[]> = runtime.call(listOrders, [{ data: { page: 1 } }]);

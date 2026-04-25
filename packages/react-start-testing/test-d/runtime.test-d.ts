@@ -1,15 +1,10 @@
 import { expectTypeOf } from 'vitest';
 
-import {
-  createRscTestRuntime,
-  createStartTestRuntime,
-  type RscRenderResult,
-  type RscTestRuntime,
-  type StartTestRuntime,
-} from '../src/index.ts';
+import { createRscTestRuntime, createStartTestRuntime } from '../src/index.ts';
+import type { RscRenderResult, RscTestRuntime, StartTestRuntime } from '../src/index.ts';
 
 // createStartTestRuntime returns a Promise<StartTestRuntime>.
-expectTypeOf(createStartTestRuntime).returns.resolves.toMatchTypeOf<StartTestRuntime>();
+expectTypeOf(createStartTestRuntime).returns.resolves.toExtend<StartTestRuntime>();
 
 // StartTestRuntime.run preserves return type.
 type RunReturn = StartTestRuntime['run'];
@@ -23,10 +18,10 @@ expectTypeOf<CallReturn>().toBeFunction();
 expectTypeOf<StartTestRuntime['cleanup']>().toEqualTypeOf<() => void>();
 
 // createRscTestRuntime returns a Promise<RscTestRuntime>.
-expectTypeOf(createRscTestRuntime).returns.resolves.toMatchTypeOf<RscTestRuntime>();
+expectTypeOf(createRscTestRuntime).returns.resolves.toExtend<RscTestRuntime>();
 
 // RscTestRuntime extends StartTestRuntime.
-expectTypeOf<RscTestRuntime>().toMatchTypeOf<StartTestRuntime>();
+expectTypeOf<RscTestRuntime>().toExtend<StartTestRuntime>();
 
 // RscRenderResult has the expected shape.
 expectTypeOf<RscRenderResult['html']>().toBeString();

@@ -57,7 +57,7 @@ export const callMiddleware = async (mw: object, options: CallMiddlewareOptions)
     );
   }
 
-  const phase = options.phase;
+  const {phase} = options;
   const impl: AnyFn | undefined =
     phase === 'server'
       ? (entry.mockServer ?? entry.originalServer)

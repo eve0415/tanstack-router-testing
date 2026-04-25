@@ -3,7 +3,8 @@ import type { ComponentType } from 'react';
 import { createElement } from 'react';
 import { renderToReadableStream, renderToString } from 'react-dom/server';
 
-import { createStartTestRuntime, type StartTestRuntime, type StartTestRuntimeOptions } from './runtime.ts';
+import { createStartTestRuntime } from './runtime.ts';
+import type { StartTestRuntime, StartTestRuntimeOptions } from './runtime.ts';
 
 /**
  * Configuration for {@link createRscTestRuntime}.
@@ -123,7 +124,7 @@ export const createRscTestRuntime = async (options: RscTestRuntimeOptions = {}):
       let done = false;
       while (!done) {
         const result = await reader.read();
-        done = result.done;
+        ({ done } = result);
         if (result.value) {
           chunks.push(decoder.decode(result.value, { stream: !done }));
         }

@@ -4,7 +4,8 @@ import type { AnyRouteMatch } from '@tanstack/router-core';
 
 import { createRootRoute, createRoute } from '@tanstack/react-router';
 
-import { type RouterHarness, createRouterHarness } from '../src/index.ts';
+import { createRouterHarness } from '../src/index.ts';
+import type { RouterHarness } from '../src/index.ts';
 
 const rootRoute = createRootRoute();
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/' });

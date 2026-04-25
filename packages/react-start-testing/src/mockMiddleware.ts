@@ -29,7 +29,7 @@ export interface MockMiddlewareOptions {
  *
  * @example
  * ```ts
- * import { createMiddleware } from '@tanstack/start';
+ * import { createMiddleware } from '@tanstack/react-start';
  * import { mockMiddleware } from '@tanstack-router-testing/react-start-testing';
  *
  * const authMiddleware = createMiddleware()

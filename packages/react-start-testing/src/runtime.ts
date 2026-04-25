@@ -117,7 +117,7 @@ export interface StartTestRuntime {
  *
  * @example
  * ```ts
- * import { createServerFn } from '@tanstack/start';
+ * import { createServerFn } from '@tanstack/react-start';
  * import {
  *   createStartTestRuntime,
  *   mockServerFn,
@@ -196,8 +196,8 @@ const toRequest = (request: Request | string | URL | undefined): Request => {
 };
 
 const executeGlobalRequestMiddlewares = async (storage: StartStorageContext, initialContext: unknown): Promise<unknown> => {
-  const middlewares = [...((storage.startOptions?.requestMiddleware ?? []) as Array<{ readonly options?: { readonly server?: unknown } }>)];
-  const pathname = new URL(storage.request.url).pathname;
+  const middlewares = [...((storage.startOptions?.requestMiddleware ?? []) as { readonly options?: { readonly server?: unknown } }[])];
+  const {pathname} = new URL(storage.request.url);
 
   const next = async (
     parentContext: unknown,

@@ -1,6 +1,7 @@
 import { expectTypeOf } from 'vitest';
 
-import { mockServerFn, type AnyServerFn } from '../src/index.ts';
+import { mockServerFn } from '../src/index.ts';
+import type { AnyServerFn } from '../src/index.ts';
 
 // mockServerFn returns a disposer function.
 expectTypeOf(mockServerFn).returns.toEqualTypeOf<() => void>();

@@ -17,8 +17,8 @@
     "test:vendored:prepare": "node scripts/gen-vendor-smoke-tests.mjs",
     "test:vendored:parity": "node scripts/check-vendor-test-parity.mjs",
     "test:types": "pnpm -r run test:types",
-    "lint": "oxlint --report-unused-disable-directives --fix --fix-suggestions && oxfmt",
-    "lint:check": "oxlint --report-unused-disable-directives && oxfmt --check",
+    "lint": "oxlint --report-unused-disable-directives --fix --fix-suggestions --ignore-path .oxlintignore && oxfmt",
+    "lint:check": "oxlint --report-unused-disable-directives --ignore-path .oxlintignore && oxfmt --check",
     "clean": "pnpm -r exec rm -rf dist node_modules .tsbuildinfo"
   },
   "devDependencies": {

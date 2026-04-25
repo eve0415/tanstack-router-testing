@@ -49,8 +49,8 @@ export const createRouterSsrHarness = async <TRouter extends AnyRouter>(
   });
 
   const response = await handler(ctx => {
-    router = ctx.router;
-    responseHeaders = ctx.responseHeaders;
+    ({ router } = ctx);
+    ({ responseHeaders } = ctx);
 
     const children = <RouterServer router={ctx.router} />;
     if (mode === 'stream') {
@@ -134,7 +134,7 @@ const hydrateRouterSsr = async <TRouter extends AnyRouter>({
     return {
       router,
       errors,
-      unmount: () => root.unmount(),
+      unmount: () =>{  root.unmount(); },
     };
   } finally {
     console.error = originalError;

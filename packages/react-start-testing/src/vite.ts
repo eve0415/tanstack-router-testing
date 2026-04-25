@@ -73,10 +73,10 @@ const tanstackStartRscTestingRuntime = (): Plugin => ({
   name: '@tanstack/react-start/testing-rsc-runtime',
   resolveId(id) {
     if (id === VIRTUAL_RSC_RUNTIME) return RESOLVED_VIRTUAL_RSC_RUNTIME;
-    return undefined;
+    return;
   },
   load(id) {
-    if (id !== RESOLVED_VIRTUAL_RSC_RUNTIME) return undefined;
+    if (id !== RESOLVED_VIRTUAL_RSC_RUNTIME) return;
     return `
       import ReactDOMServer from 'react-dom/server';
 

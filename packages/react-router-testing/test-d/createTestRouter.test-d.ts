@@ -37,7 +37,7 @@ void harness.getLoaderData('__root__');
 void harness.getRouteContext('__root__');
 void harness.getSearch('__root__');
 void harness.getParams('__root__');
-void harness.cleanup();
+ harness.cleanup();
 
 // @ts-expect-error — initialEntries must be strings.
 createTestRouter({ routeTree, initialEntries: [1] });

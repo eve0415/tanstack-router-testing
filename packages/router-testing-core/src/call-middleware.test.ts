@@ -22,7 +22,7 @@ describe('callMiddleware', () => {
       phase: 'server',
       context: { existing: 'value' },
     });
-    expect(result.context).toEqual({ existing: 'value', added: true });
+    expect(result.context).toStrictEqual({ existing: 'value', added: true });
   });
 
   it('calls client phase', async () => {
@@ -34,7 +34,7 @@ describe('callMiddleware', () => {
     registerMiddleware(mw, { client: clientImpl });
 
     const result = await callMiddleware(mw, { phase: 'client', context: {} });
-    expect(result.context).toEqual({ client: true });
+    expect(result.context).toStrictEqual({ client: true });
   });
 
   it('throws if middleware not registered', async () => {
@@ -61,7 +61,7 @@ describe('callMiddleware', () => {
     setMiddlewareMock(mw, { server: mockServer });
 
     const result = await callMiddleware(mw, { phase: 'server', context: {} });
-    expect(result.context).toEqual({ mocked: true });
+    expect(result.context).toStrictEqual({ mocked: true });
   });
 
   it('provides a default request when none given', async () => {

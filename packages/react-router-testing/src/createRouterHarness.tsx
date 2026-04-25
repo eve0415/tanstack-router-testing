@@ -123,6 +123,12 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    *   `router.navigate()` (e.g. `{ to: '/posts/$postId', params: { postId: '7' } }`).
    * @returns A promise that resolves when navigation completes.
    *
+   * @remarks
+   * Unlike {@link RouterHarness.getRedirect | getRedirect()}, navigation
+   * errors (e.g. a `beforeLoad` guard that throws a redirect) will reject
+   * the returned promise. Wrap the call in a try/catch if you expect
+   * redirect-throwing guards to fire.
+   *
    * @example
    * ```ts
    * await harness.navigate({ to: '/posts/$postId', params: { postId: '7' } });
@@ -240,6 +246,11 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * @returns The `search` object from the matched route, or `undefined` if
    *   the match is not found.
    *
+   * @remarks
+   * The router must be loaded (via {@link RouterHarness.load | load()} or
+   * {@link RouterHarness.navigate | navigate()}) before search params are
+   * populated.
+   *
    * @example
    * ```ts
    * const harness = createRouterHarness({
@@ -259,6 +270,11 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * @returns The `params` object from the matched route, or `undefined` if
    *   the match is not found.
    *
+   * @remarks
+   * The router must be loaded (via {@link RouterHarness.load | load()} or
+   * {@link RouterHarness.navigate | navigate()}) before params are
+   * populated.
+   *
    * @example
    * ```ts
    * await harness.load();
@@ -273,6 +289,11 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * @param target - A {@link RouteMatchTarget} identifying the route.
    * @returns The `error` value from the matched route, or `undefined` if no
    *   error occurred or the match is not found.
+   *
+   * @remarks
+   * The router must be loaded (via {@link RouterHarness.load | load()})
+   * before errors are captured. Errors thrown in `beforeLoad` or `loader`
+   * are stored on the match rather than rejecting the `load()` promise.
    *
    * @example
    * ```ts
@@ -396,8 +417,8 @@ export const createRouterHarness = <
   const TestRouterProvider = (): ReactElement => {
     const provider = <RouterProvider router={router} />;
     if (!queryClient || !_QueryClientProvider) return provider;
-    const QCP = _QueryClientProvider;
-    return <QCP client={queryClient}>{provider}</QCP>;
+    const Provider = _QueryClientProvider;
+    return <Provider client={queryClient}>{provider}</Provider>;
   };
 
   const findMatch = (target: RouteMatchTarget): AnyRouteMatch | undefined => {
@@ -413,7 +434,7 @@ export const createRouterHarness = <
       if (queryClient) await resolveQueryClientProvider();
       await router.load();
     },
-    navigate: options => router.navigate(options).then(() => undefined),
+    navigate: async options => { await router.navigate(options); },
     preload: options => router.preloadRoute(options) as Promise<readonly AnyRouteMatch[] | undefined>,
     match: href => {
       const url = new URL(href, 'http://tanstack-router-testing.test');
@@ -430,7 +451,7 @@ export const createRouterHarness = <
       await router.navigate(options).catch(() => {});
       await router.load();
       const after = router.state.location;
-      if (after.pathname === intended.pathname) return undefined;
+      if (after.pathname === intended.pathname) return;
       return { pathname: after.pathname, search: after.searchStr, hash: after.hash };
     },
     cleanup: () => {
