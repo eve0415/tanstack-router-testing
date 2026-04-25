@@ -15,6 +15,7 @@
  *   {@link clearAllMiddlewareMocks} — runtime registry for Start middleware.
  */
 
+export { type CallMiddlewareOptions, type CallMiddlewareResult, callMiddleware } from './call-middleware.ts';
 export { type CreateTestHistoryOptions, createTestHistory } from './history.ts';
 export { getEnv, runInEnv, setEnv, type TestEnv } from './env.ts';
 export {
