@@ -163,6 +163,30 @@ describe('react-router-testing harness integration', () => {
     harness.cleanup();
   });
 
+  it('getRedirect returns the resolved location after a redirect', async () => {
+    const harness = createRouterHarness({
+      routeTree,
+      initialEntries: ['/'],
+      context: { auth: null },
+    });
+    await harness.load();
+    const result = await harness.getRedirect({ to: '/admin' });
+    expect(result).toBeDefined();
+    expect(result!.pathname).toBe('/login');
+    harness.cleanup();
+  });
+
+  it('getRedirect returns undefined when no redirect occurs', async () => {
+    const harness = createRouterHarness({
+      routeTree,
+      initialEntries: ['/'],
+    });
+    await harness.load();
+    const result = await harness.getRedirect({ to: '/posts/$postId', params: { postId: '1' } });
+    expect(result).toBeUndefined();
+    harness.cleanup();
+  });
+
   it('exposes route lifecycle state through harness accessors', async () => {
     const harness = createRouterHarness({
       routeTree,

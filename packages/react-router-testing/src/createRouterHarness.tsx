@@ -23,6 +23,9 @@ export interface RouterHarness<TRouter extends AnyRouter> {
   readonly getSearch: (target: RouteMatchTarget) => unknown;
   readonly getParams: (target: RouteMatchTarget) => unknown;
   readonly getError: (target: RouteMatchTarget) => unknown;
+  readonly getRedirect: (options: Parameters<TRouter['navigate']>[0]) => Promise<
+    { readonly pathname: string; readonly search: string; readonly hash: string } | undefined
+  >;
   readonly cleanup: () => void;
 }
 
@@ -66,6 +69,14 @@ export const createRouterHarness = <
     getSearch: target => findMatch(target)?.search,
     getParams: target => findMatch(target)?.params,
     getError: target => findMatch(target)?.error,
+    getRedirect: async options => {
+      const intended = router.buildLocation(options as Parameters<typeof router.buildLocation>[0]);
+      await router.navigate(options).catch(() => {});
+      await router.load();
+      const after = router.state.location;
+      if (after.pathname === intended.pathname) return undefined;
+      return { pathname: after.pathname, search: after.searchStr, hash: after.hash };
+    },
     cleanup: () => {
       router.cancelMatches();
       router.history.destroy?.();
