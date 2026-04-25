@@ -16,7 +16,6 @@ This repo ships a set of small, focused packages that let you write fast unit an
 | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | [`@tanstack-router-testing/react-router-testing`](./packages/react-router-testing)                   | `createTestRouter`, `createRouterHarness`, plus `./ssr`; future shape: `@tanstack/react-router/testing`. |
 | [`@tanstack-router-testing/react-start-testing`](./packages/react-start-testing)                     | `mockServerFn`, `mockMiddleware`, `runInStartEnv`, `createStartTestRuntime`, `createRscTestRuntime`, `clearStartMocks`, plus `./vite`. |
-| [`@tanstack-router-testing/router-testing-plugin`](./packages/router-testing-plugin)                 | Compatibility wrapper for `tanstackStartTesting`; future shape: `@tanstack/react-start/testing/vite`. |
 | [`@tanstack-router-testing/router-testing-core`](./packages/router-testing-core)                     | Internal registry/env runtime; not a user-facing API.                                                 |
 | [`@tanstack-router-testing/react-start-testing-storybook`](./packages/react-start-testing-storybook) | Experimental Storybook decorator, outside the v1 public contribution surface.                         |
 
@@ -45,7 +44,7 @@ docs/                # Getting-started and per-package guides
 | 2.5   | Start-interception ADR                                       | ✅    |
 | 3     | `react-router-testing` real-router helpers                   | ✅    |
 | 4     | `react-start-testing` direct server-fn helpers               | ✅    |
-| 5     | `router-testing-plugin` (real Start shim alias + tests)      | ✅    |
+| 5     | Vitest plugin (Start shim alias via `react-start-testing/vite`) | ✅    |
 | 6     | `react-start-testing-storybook` (renders stories in context) | ✅    |
 | 7     | Type-d suites per package + integration tests                | ✅    |
 | 8     | Docs + 0.1.0 publish                                         | —     |
@@ -110,4 +109,4 @@ See [`/home/node/.claude/plans/i-want-you-to-nifty-allen.md`](./docs/plan.md) (m
 
 ## License
 
-TBD (likely MIT to match TanStack upstream).
+[MIT](./LICENSE)
