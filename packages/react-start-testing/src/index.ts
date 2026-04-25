@@ -10,8 +10,8 @@ export { clearStartMocks } from './clearStartMocks.ts';
 export { type AnyServerFn, mockServerFn, type ServerFnMock } from './mockServerFn.ts';
 export { type MockMiddlewareOptions, mockMiddleware } from './mockMiddleware.ts';
 export { runInStartEnv } from './isomorphic.ts';
+export { createRscTestRuntime, type RscRenderResult, type RscTestRuntime, type RscTestRuntimeOptions } from './rsc.tsx';
 export {
-  createRscTestRuntime,
   createStartTestRuntime,
   type StartTestRuntime,
   type StartTestRuntimeOptions,

@@ -81,8 +81,6 @@ export const createStartTestRuntime = async (options: StartTestRuntimeOptions = 
   return runtime;
 };
 
-export const createRscTestRuntime = createStartTestRuntime;
-
 const toRequest = (request: Request | string | URL | undefined): Request => {
   if (request instanceof Request) return request;
   const url = request?.toString() ?? 'http://tanstack-router-testing.test/';
