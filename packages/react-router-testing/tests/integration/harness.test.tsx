@@ -142,6 +142,27 @@ describe('react-router-testing harness integration', () => {
     expect(router.history).toBe(history);
   });
 
+  it('getError returns the error thrown by a loader', async () => {
+    const error = new Error('loader failed');
+    const root = createRootRoute();
+    const failRoute = createRoute({
+      getParentRoute: () => root,
+      path: '/fail',
+      loader: () => {
+        throw error;
+      },
+      errorComponent: () => <div>Error</div>,
+    });
+    const tree = root.addChildren([failRoute]);
+    const harness = createRouterHarness({
+      routeTree: tree,
+      initialEntries: ['/fail'],
+    });
+    await harness.load();
+    expect(harness.getError('/fail')).toBe(error);
+    harness.cleanup();
+  });
+
   it('exposes route lifecycle state through harness accessors', async () => {
     const harness = createRouterHarness({
       routeTree,

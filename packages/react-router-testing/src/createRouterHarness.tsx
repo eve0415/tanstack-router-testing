@@ -22,6 +22,7 @@ export interface RouterHarness<TRouter extends AnyRouter> {
   readonly getRouteContext: (target: RouteMatchTarget) => unknown;
   readonly getSearch: (target: RouteMatchTarget) => unknown;
   readonly getParams: (target: RouteMatchTarget) => unknown;
+  readonly getError: (target: RouteMatchTarget) => unknown;
   readonly cleanup: () => void;
 }
 
@@ -64,6 +65,7 @@ export const createRouterHarness = <
     getRouteContext: target => findMatch(target)?.context,
     getSearch: target => findMatch(target)?.search,
     getParams: target => findMatch(target)?.params,
+    getError: target => findMatch(target)?.error,
     cleanup: () => {
       router.cancelMatches();
       router.history.destroy?.();
