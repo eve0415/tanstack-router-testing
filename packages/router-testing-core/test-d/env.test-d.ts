@@ -1,5 +1,7 @@
 import type { TestEnv } from '../src/env.ts';
 
+import { expectTypeOf } from 'vitest';
+
 /**
  * Type-level tests for `router-testing-core/env`. Runs under `tsgo --noEmit`
  * via the package's `test:types` script. `@ts-expect-error` assertions
@@ -11,6 +13,9 @@ import { getEnv, runInEnv, setEnv } from '../src/env.ts';
 // getEnv returns TestEnv | undefined, not `any`.
 const current: TestEnv | undefined = getEnv();
 void current;
+
+expectTypeOf(getEnv).returns.toEqualTypeOf<TestEnv | undefined>();
+expectTypeOf(runInEnv).parameter(0).toEqualTypeOf<TestEnv>();
 
 // setEnv accepts `'server'`, `'client'`, `undefined`.
 setEnv('server');

@@ -1,11 +1,15 @@
 import type { CreateTestHistoryOptions } from '../src/history.ts';
 import type { RouterHistory } from '@tanstack/history';
 
+import { expectTypeOf } from 'vitest';
+
 import { createTestHistory } from '../src/history.ts';
 
 // Returns RouterHistory.
 const history: RouterHistory = createTestHistory();
 void history;
+
+expectTypeOf(createTestHistory).returns.toEqualTypeOf<RouterHistory>();
 
 // Options accept initialEntries as readonly string[].
 createTestHistory({ initialEntries: ['/a', '/b'] });
