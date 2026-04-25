@@ -9,7 +9,7 @@
  */
 
 import { createMemoryHistory } from '@tanstack/history';
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { Outlet, createRootRoute, createRoute, redirect } from '@tanstack/react-router';
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -173,7 +173,7 @@ describe('react-router-testing harness integration', () => {
     await harness.load();
     const result = await harness.getRedirect({ to: '/admin' });
     expect(result).toBeDefined();
-    expect(result!.pathname).toBe('/login');
+    expect(result?.pathname).toBe('/login');
     harness.cleanup();
   });
 
@@ -202,23 +202,22 @@ describe('react-router-testing harness integration', () => {
 
     await harness.navigate({ to: '/posts/$postId', params: { postId: '99' } });
 
-    expect(harness.getParams(postRoute)).toEqual({ postId: '99' });
+    expect(harness.getParams(postRoute)).toEqual({ postId: '99' }); // eslint-disable-line jest/prefer-strict-equal -- params has prototype diff
     expect(harness.getLoaderData('/posts/$postId')).toStrictEqual({ post: { id: '99', title: 'Post 99' } });
   });
 
   it('wraps in QueryClientProvider when queryClient is provided', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const root = createRootRoute({
-      component: () => {
-        const qc = useQueryClient();
-        return <div data-testid="has-query">{qc ? 'yes' : 'no'}</div>;
-      },
-    });
+    const QueryConsumer = () => {
+      const qc = useQueryClient();
+      return <div data-testid="has-query">{String(Boolean(qc))}</div>;
+    };
+    const root = createRootRoute({ component: QueryConsumer });
     const tree = root.addChildren([]);
     const harness = createRouterHarness({ routeTree: tree, queryClient });
     await harness.load();
     const { getByTestId } = render(<harness.TestRouterProvider />);
-    expect(getByTestId('has-query').textContent).toBe('yes');
+    expect(getByTestId('has-query').textContent).toBe('true');
     harness.cleanup();
     queryClient.clear();
   });

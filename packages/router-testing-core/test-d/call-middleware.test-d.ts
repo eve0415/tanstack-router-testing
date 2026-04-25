@@ -10,8 +10,8 @@ expectTypeOf(callMiddleware).returns.resolves.toEqualTypeOf<CallMiddlewareResult
 // CallMiddlewareOptions.phase is a discriminated union.
 expectTypeOf<CallMiddlewareOptions['phase']>().toEqualTypeOf<'server' | 'client'>();
 
-// context is optional.
-expectTypeOf<CallMiddlewareOptions['context']>().toEqualTypeOf<unknown | undefined>();
+// context is optional unknown.
+expectTypeOf<CallMiddlewareOptions['context']>().toBeUnknown();
 
 // Result.context is unknown (middleware can return anything).
 expectTypeOf<CallMiddlewareResult['context']>().toEqualTypeOf<unknown>();

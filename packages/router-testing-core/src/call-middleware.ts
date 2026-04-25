@@ -69,11 +69,11 @@ export const callMiddleware = async (mw: object, options: CallMiddlewareOptions)
 
   let finalContext: unknown = options.context ?? {};
 
-  const next = async (ctx?: { readonly context?: unknown }): Promise<{ context: unknown }> => {
+  const next = (ctx?: { readonly context?: unknown }): Promise<{ context: unknown }> => {
     if (ctx?.context !== undefined) {
       finalContext = ctx.context;
     }
-    return { context: finalContext };
+    return Promise.resolve({ context: finalContext });
   };
 
   await impl({
