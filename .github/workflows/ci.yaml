@@ -58,6 +58,7 @@ jobs:
 
   coverage:
     name: Coverage
+    needs: ci
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
