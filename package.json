@@ -20,7 +20,8 @@
     "lint": "oxlint --report-unused-disable-directives --fix --fix-suggestions --ignore-path .oxlintignore && oxfmt",
     "lint:check": "oxlint --report-unused-disable-directives --ignore-path .oxlintignore && oxfmt --check",
     "test:unit:coverage": "pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests",
-    "clean": "pnpm -r exec rm -rf dist node_modules .tsbuildinfo"
+    "clean": "pnpm -r exec rm -rf dist node_modules .tsbuildinfo",
+    "bump": "node scripts/bump-version.ts"
   },
   "devDependencies": {
     "@auth/core": "^0.41.2",
