@@ -14,12 +14,7 @@
 export { createRouterHarness, type FileRouteHarnessOptions, type RouterHarness } from './createRouterHarness.tsx';
 export { type CreateTestRouterMemoryOptions, type CreateTestRouterOptions, createTestRouter } from './createTestRouter.ts';
 export { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
-export type {
-  CreateRouterSsrHarnessOptions,
-  HydrateRouterSsrOptions,
-  RouterSsrHarness,
-  RouterSsrMode,
-} from './ssr.tsx';
+export type { CreateRouterSsrHarnessOptions, HydrateRouterSsrOptions, RouterSsrHarness, RouterSsrMode } from './ssr.tsx';
 
 /**
  * Current package version. Bumped at release time.

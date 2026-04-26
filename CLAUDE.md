@@ -35,6 +35,7 @@ pnpm run lint:check           # oxlint + oxfmt --check (CI)
 ```
 
 Per-package (from package dir):
+
 ```bash
 pnpm run build                # tsdown
 pnpm run test:unit            # vitest run

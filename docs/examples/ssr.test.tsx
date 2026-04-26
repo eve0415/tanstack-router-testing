@@ -1,7 +1,7 @@
-import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
-import { describe, expect, it } from 'vitest';
 import { createTestRouter } from '@tanstack-router-testing/react-router-testing';
 import { createRouterSsrHarness } from '@tanstack-router-testing/react-router-testing/ssr';
+import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
+import { describe, expect, it } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Factory that builds a fresh route tree + router per call (required for SSR)

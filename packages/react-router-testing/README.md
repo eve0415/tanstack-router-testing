@@ -18,8 +18,8 @@ import { createRouterHarness } from '@tanstack-router-testing/react-router-testi
 import { Route } from './routes/posts.$postId';
 
 const harness = createRouterHarness({
-  route: Route,                  // single file route import
-  params: { postId: '42' },     // fully typed from route path
+  route: Route, // single file route import
+  params: { postId: '42' }, // fully typed from route path
 });
 await harness.load();
 const { findByText } = render(<harness.TestRouterProvider />);

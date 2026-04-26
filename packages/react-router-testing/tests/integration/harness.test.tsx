@@ -210,7 +210,7 @@ describe('react-router-testing harness integration', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const QueryConsumer = () => {
       const qc = useQueryClient();
-      return <div data-testid="has-query">{String(Boolean(qc))}</div>;
+      return <div data-testid='has-query'>{String(Boolean(qc))}</div>;
     };
     const root = createRootRoute({ component: QueryConsumer });
     const tree = root.addChildren([]);

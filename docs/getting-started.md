@@ -98,7 +98,7 @@ describe('post route', () => {
   it('loads and renders a post', async () => {
     const harness = createRouterHarness({
       route: Route,
-      params: { postId: '42' },  // typed from the route's path
+      params: { postId: '42' }, // typed from the route's path
     });
     await harness.load();
 
@@ -112,6 +112,7 @@ describe('post route', () => {
 ```
 
 The harness automatically:
+
 - Walks from the route to its root to get the full route tree
 - Neuters ancestor loaders for isolation (ancestor `beforeLoad` still runs for context cascading)
 - Computes the initial URL from `params` and `search`
@@ -135,7 +136,7 @@ const { TestRouterProvider } = createRouterHarness({
 });
 render(
   <TestRouterProvider>
-    <MyComponent />  {/* calls Route.useLoaderData() internally */}
+    <MyComponent /> {/* calls Route.useLoaderData() internally */}
   </TestRouterProvider>,
 );
 ```

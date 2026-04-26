@@ -34,8 +34,8 @@ describe('post route', () => {
   it('loads and renders a post', async () => {
     const harness = createRouterHarness({
       route: Route,
-      params: { postId: '42' },    // fully typed from route path
-      loaderData: { id: '42', title: 'Hello' },  // skip the real loader
+      params: { postId: '42' }, // fully typed from route path
+      loaderData: { id: '42', title: 'Hello' }, // skip the real loader
     });
     await harness.load();
     const { findByText } = render(<harness.TestRouterProvider />);
@@ -59,12 +59,12 @@ harness.cleanup();
 
 ## Packages
 
-| Package | Purpose |
-| --- | --- |
-| [`react-router-testing`](./packages/react-router-testing) | `createRouterHarness` (file route or full tree), `createTestRouter`, SSR harness |
-| [`react-start-testing`](./packages/react-start-testing) | `mockServerFn`, `mockMiddleware`, `createStartTestRuntime`, RSC runtime, Vite plugin |
-| [`router-testing-core`](./packages/router-testing-core) | Internal registry/env runtime (transitive dependency) |
-| [`react-start-testing-storybook`](./packages/react-start-testing-storybook) | Storybook decorator for Start stories |
+| Package                                                                     | Purpose                                                                              |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [`react-router-testing`](./packages/react-router-testing)                   | `createRouterHarness` (file route or full tree), `createTestRouter`, SSR harness     |
+| [`react-start-testing`](./packages/react-start-testing)                     | `mockServerFn`, `mockMiddleware`, `createStartTestRuntime`, RSC runtime, Vite plugin |
+| [`router-testing-core`](./packages/router-testing-core)                     | Internal registry/env runtime (transitive dependency)                                |
+| [`react-start-testing-storybook`](./packages/react-start-testing-storybook) | Storybook decorator for Start stories                                                |
 
 All packages are scoped under `@tanstack-router-testing/`.
 

@@ -1,7 +1,7 @@
+import { createRouterHarness, createTestRouter } from '@tanstack-router-testing/react-router-testing';
 import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createRouterHarness, createTestRouter } from '@tanstack-router-testing/react-router-testing';
 
 // ---------------------------------------------------------------------------
 // Route tree (normally generated — hand-built here for illustration)
@@ -39,16 +39,13 @@ const postRoute = createRoute({
     return (
       <article>
         <h2>{title}</h2>
-        <span data-testid="post-id">{id}</span>
+        <span data-testid='post-id'>{id}</span>
       </article>
     );
   },
 });
 
-const routeTree = rootRoute.addChildren([
-  indexRoute,
-  postsRoute.addChildren([postRoute]),
-]);
+const routeTree = rootRoute.addChildren([indexRoute, postsRoute.addChildren([postRoute])]);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -148,7 +145,7 @@ describe('createRouterHarness', () => {
     harness = createRouterHarness({ routeTree });
     const matches = harness.match('/posts/42');
 
-    expect(matches.some((m) => m.routeId === '/posts/$postId')).toBe(true);
+    expect(matches.some(m => m.routeId === '/posts/$postId')).toBe(true);
   });
 });
 
@@ -201,7 +198,7 @@ describe('createRouterHarness with route option', () => {
   it('renders children that use route hooks', async () => {
     const PostId = () => {
       const { id } = postRoute.useLoaderData();
-      return <span data-testid="id">{id}</span>;
+      return <span data-testid='id'>{id}</span>;
     };
 
     const { TestRouterProvider } = createRouterHarness({

@@ -1,10 +1,10 @@
+import type { StartTestRuntime, StartTestRuntimeOptions } from './runtime.ts';
 import type { ComponentType } from 'react';
 
 import { createElement } from 'react';
 import { renderToReadableStream, renderToString } from 'react-dom/server';
 
 import { createStartTestRuntime } from './runtime.ts';
-import type { StartTestRuntime, StartTestRuntimeOptions } from './runtime.ts';
 
 /**
  * Configuration for {@link createRscTestRuntime}.
@@ -60,10 +60,7 @@ export interface RscTestRuntime extends StartTestRuntime {
    *   rendered HTML and, when streaming is enabled, the raw stream and decoded
    *   chunks.
    */
-  readonly renderServerComponent: <TProps extends Record<string, unknown>>(
-    component: ComponentType<TProps>,
-    props: TProps,
-  ) => Promise<RscRenderResult>;
+  readonly renderServerComponent: <TProps extends Record<string, unknown>>(component: ComponentType<TProps>, props: TProps) => Promise<RscRenderResult>;
 }
 
 /**
@@ -103,10 +100,7 @@ export const createRscTestRuntime = async (options: RscTestRuntimeOptions = {}):
 
   return {
     ...base,
-    renderServerComponent: async <TProps extends Record<string, unknown>>(
-      component: ComponentType<TProps>,
-      props: TProps,
-    ): Promise<RscRenderResult> => {
+    renderServerComponent: async <TProps extends Record<string, unknown>>(component: ComponentType<TProps>, props: TProps): Promise<RscRenderResult> => {
       const element = createElement(component, props);
 
       if (!streaming) {
@@ -121,14 +115,14 @@ export const createRscTestRuntime = async (options: RscTestRuntimeOptions = {}):
       const [collectStream, returnStream] = stream.tee();
 
       const reader = collectStream.getReader();
-      let done = false;
-      while (!done) {
+      const collectChunks = async (): Promise<void> => {
         const result = await reader.read();
-        ({ done } = result);
-        if (result.value) {
-          chunks.push(decoder.decode(result.value, { stream: !done }));
+        if (result.value !== undefined) {
+          chunks.push(decoder.decode(result.value, { stream: !result.done }));
         }
-      }
+        if (!result.done) await collectChunks();
+      };
+      await collectChunks();
 
       const html = chunks.join('');
       return { html, stream: returnStream, chunks };

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import type { Plugin, UserConfig } from 'vite';
+
 import { describe, expect, it } from 'vitest';
 
 import { tanstackStartTesting } from '../../src/vite.ts';
@@ -18,9 +19,7 @@ describe('tanstackStartTesting vite plugin', () => {
   });
 
   it('respects custom generatedRouteTree path', () => {
-    const config = getTestPluginConfig(
-      tanstackStartTesting({ generatedRouteTree: 'src/custom.gen.ts' }),
-    );
+    const config = getTestPluginConfig(tanstackStartTesting({ generatedRouteTree: 'src/custom.gen.ts' }));
     expect(config?.test?.setupFiles).toContain('src/custom.gen.ts');
   });
 
@@ -30,9 +29,7 @@ describe('tanstackStartTesting vite plugin', () => {
   });
 
   it('omits alias but still injects setupFiles when aliasReactStart is false', () => {
-    const config = getTestPluginConfig(
-      tanstackStartTesting({ aliasReactStart: false }),
-    );
+    const config = getTestPluginConfig(tanstackStartTesting({ aliasReactStart: false }));
     expect(config?.resolve).toBeUndefined();
     expect(config?.test?.setupFiles).toContain('src/routeTree.gen.ts');
   });

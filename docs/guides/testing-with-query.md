@@ -109,9 +109,7 @@ describe('PostList component', () => {
 
   it('renders posts from the query cache', async () => {
     // Pre-populate the cache so the component renders immediately
-    queryClient.setQueryData(['posts'], [
-      { id: 1, title: 'Cached Post' },
-    ]);
+    queryClient.setQueryData(['posts'], [{ id: 1, title: 'Cached Post' }]);
 
     const harness = createRouterHarness({
       routeTree,

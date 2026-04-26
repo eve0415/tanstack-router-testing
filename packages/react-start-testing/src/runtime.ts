@@ -3,10 +3,11 @@ import type { AnyRouter } from '@tanstack/react-router';
 import type { AnyStartInstanceOptions } from '@tanstack/start-client-core';
 import type { StartHandlerType, StartStorageContext } from '@tanstack/start-storage-context';
 
+import { runWithStartContext } from '@tanstack/start-storage-context';
+
 import { clearStartMocks } from './clearStartMocks.ts';
 import { runInStartEnv } from './isomorphic.ts';
 import { __setStartOptionsForTesting } from './shim.ts';
-import { runWithStartContext } from '@tanstack/start-storage-context';
 
 /**
  * Configuration for {@link createStartTestRuntime}.
@@ -178,11 +179,8 @@ export const createStartTestRuntime = async (options: StartTestRuntimeOptions = 
         return runInStartEnv(env, fn);
       });
     },
-    call: <TArgs extends readonly unknown[], TReturn>(
-      fn: (...args: TArgs) => TReturn | Promise<TReturn>,
-      args: TArgs,
-      runOptions?: StartTestRunOptions,
-    ) => runtime.run(() => fn(...args), runOptions) as Promise<Awaited<TReturn>>,
+    call: <TArgs extends readonly unknown[], TReturn>(fn: (...args: TArgs) => TReturn | Promise<TReturn>, args: TArgs, runOptions?: StartTestRunOptions) =>
+      runtime.run(() => fn(...args), runOptions) as Promise<Awaited<TReturn>>,
     cleanup: clearStartMocks,
   };
 
@@ -197,7 +195,7 @@ const toRequest = (request: Request | string | URL | undefined): Request => {
 
 const executeGlobalRequestMiddlewares = async (storage: StartStorageContext, initialContext: unknown): Promise<unknown> => {
   const middlewares = [...((storage.startOptions?.requestMiddleware ?? []) as { readonly options?: { readonly server?: unknown } }[])];
-  const {pathname} = new URL(storage.request.url);
+  const { pathname } = new URL(storage.request.url);
 
   const next = async (
     parentContext: unknown,

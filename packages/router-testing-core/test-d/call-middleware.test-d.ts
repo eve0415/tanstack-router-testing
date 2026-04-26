@@ -1,6 +1,6 @@
-import { expectTypeOf } from 'vitest';
-
 import type { CallMiddlewareOptions, CallMiddlewareResult } from '../src/call-middleware.ts';
+
+import { expectTypeOf } from 'vitest';
 
 import { callMiddleware } from '../src/call-middleware.ts';
 

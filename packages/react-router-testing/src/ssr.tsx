@@ -105,16 +105,15 @@ const hydrateRouterSsr = async <TRouter extends AnyRouter>({
   readonly unmount: () => void;
 }> => {
   const target = container ?? document;
-  const rootElement = target instanceof Document ? target : target.ownerDocument;
-
-  if (!rootElement) {
+  if (!(target instanceof Document) && !target.isConnected) {
     throw new Error('[tanstack-router-testing] hydrate: container is not attached to a document.');
   }
 
+  const hydrateTarget = target;
+
   if (target instanceof Document) {
-    target.open();
-    target.write(html);
-    target.close();
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    target.documentElement.replaceWith(target.importNode(parsed.documentElement, true));
   } else {
     target.innerHTML = html;
   }
@@ -127,14 +126,16 @@ const hydrateRouterSsr = async <TRouter extends AnyRouter>({
   };
 
   try {
-    const root = hydrateRoot(rootElement, <RouterClient router={router} /> as ReactElement);
+    const root = hydrateRoot(hydrateTarget, (<RouterClient router={router} />) as ReactElement);
     await new Promise<void>(resolve => {
       setTimeout(resolve, 0);
     });
     return {
       router,
       errors,
-      unmount: () =>{  root.unmount(); },
+      unmount: () => {
+        root.unmount();
+      },
     };
   } finally {
     console.error = originalError;

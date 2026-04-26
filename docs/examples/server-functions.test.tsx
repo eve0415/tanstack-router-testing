@@ -1,13 +1,9 @@
+import { clearStartMocks, createStartTestRuntime, mockServerFn } from '@tanstack-router-testing/react-start-testing';
 // NOTE: Requires the Vite plugin from '@tanstack-router-testing/react-start-testing/vite'
 // so that `@tanstack/react-start` imports resolve to the test shim.
 // See tanstackStartTesting() in your vitest/vite config.
 import { createServerFn } from '@tanstack/react-start';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  clearStartMocks,
-  createStartTestRuntime,
-  mockServerFn,
-} from '@tanstack-router-testing/react-start-testing';
 
 // ---------------------------------------------------------------------------
 // Server functions under test
@@ -20,11 +16,10 @@ const listOrders = createServerFn()
     return [{ id: 'real-1', userId: data.userId, total: 100 }];
   });
 
-const getUser = createServerFn()
-  .handler(async () => {
-    // In production this would read from session/cookies
-    return { id: 'user-1', name: 'Alice' };
-  });
+const getUser = createServerFn().handler(async () => {
+  // In production this would read from session/cookies
+  return { id: 'user-1', name: 'Alice' };
+});
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -43,9 +38,7 @@ describe('mockServerFn', () => {
       { id: 'mock-2', userId: data.userId, total: 50 },
     ]);
 
-    const orders = await runtime.call(listOrders, [
-      { data: { userId: 'u42' } },
-    ]);
+    const orders = await runtime.call(listOrders, [{ data: { userId: 'u42' } }]);
 
     expect(orders).toEqual([
       { id: 'mock-1', userId: 'u42', total: 0 },

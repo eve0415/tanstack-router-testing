@@ -7,11 +7,7 @@ TanStack Start middleware runs in two phases (server and client) and modifies co
 ## Setup
 
 ```ts
-import {
-  mockMiddleware,
-  callMiddleware,
-  clearStartMocks,
-} from '@tanstack-router-testing/react-start-testing';
+import { mockMiddleware, callMiddleware, clearStartMocks } from '@tanstack-router-testing/react-start-testing';
 import { createMiddleware } from '@tanstack/react-start';
 import { describe, it, expect, afterEach } from 'vitest';
 ```
@@ -35,8 +31,7 @@ describe('with mocked auth middleware', () => {
 
   it('injects a test user into context', async () => {
     const dispose = mockMiddleware(authMiddleware, {
-      server: async ({ next }) =>
-        next({ context: { user: { id: 'test-user', role: 'admin' } } }),
+      server: async ({ next }) => next({ context: { user: { id: 'test-user', role: 'admin' } } }),
     });
 
     // Server functions that use this middleware now see the mocked user.
@@ -52,11 +47,10 @@ describe('with mocked auth middleware', () => {
 `callMiddleware(mw, { phase, context?, request? })` runs a single phase of the middleware without a full router or server function call chain. It captures the context produced by the middleware's `next()` call.
 
 ```ts
-const loggingMiddleware = createMiddleware()
-  .server(async ({ next, context }) => {
-    // Imagine this logs and enriches context
-    return next({ context: { ...context, requestId: 'req-123' } });
-  });
+const loggingMiddleware = createMiddleware().server(async ({ next, context }) => {
+  // Imagine this logs and enriches context
+  return next({ context: { ...context, requestId: 'req-123' } });
+});
 
 describe('loggingMiddleware server phase', () => {
   it('adds requestId to context', async () => {
@@ -88,19 +82,17 @@ describe('loggingMiddleware server phase', () => {
 When middleware calls `next({ context: { ... } })`, the new context is merged with the existing context. This is how middleware chains build up a shared context object.
 
 ```ts
-const tenantMiddleware = createMiddleware()
-  .server(async ({ next, context }) => {
-    return next({
-      context: { ...context, tenantId: 'tenant-abc' },
-    });
+const tenantMiddleware = createMiddleware().server(async ({ next, context }) => {
+  return next({
+    context: { ...context, tenantId: 'tenant-abc' },
   });
+});
 
-const permissionsMiddleware = createMiddleware()
-  .server(async ({ next, context }) => {
-    return next({
-      context: { ...context, permissions: ['read'] },
-    });
+const permissionsMiddleware = createMiddleware().server(async ({ next, context }) => {
+  return next({
+    context: { ...context, permissions: ['read'] },
   });
+});
 
 describe('middleware context chaining', () => {
   it('tenant middleware adds tenantId', async () => {
@@ -147,8 +139,7 @@ const getOrders = createServerFn()
 
 it('server function receives mocked middleware context', async () => {
   mockMiddleware(authMiddleware, {
-    server: async ({ next }) =>
-      next({ context: { user: { id: 'mock-user' } } }),
+    server: async ({ next }) => next({ context: { user: { id: 'mock-user' } } }),
   });
 
   mockServerFn(getOrders, async ({ context }) => {

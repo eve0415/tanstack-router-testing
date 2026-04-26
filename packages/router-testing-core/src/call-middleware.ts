@@ -51,17 +51,11 @@ export interface CallMiddlewareResult {
 export const callMiddleware = async (mw: object, options: CallMiddlewareOptions): Promise<CallMiddlewareResult> => {
   const entry = getMiddlewareEntry(mw);
   if (!entry) {
-    throw new Error(
-      '[tanstack-router-testing] Cannot call an unregistered middleware. ' +
-        'Register it with registerMiddleware() first.',
-    );
+    throw new Error('[tanstack-router-testing] Cannot call an unregistered middleware. Register it with registerMiddleware() first.');
   }
 
-  const {phase} = options;
-  const impl: AnyFn | undefined =
-    phase === 'server'
-      ? (entry.mockServer ?? entry.originalServer)
-      : (entry.mockClient ?? entry.originalClient);
+  const { phase } = options;
+  const impl: AnyFn | undefined = phase === 'server' ? (entry.mockServer ?? entry.originalServer) : (entry.mockClient ?? entry.originalClient);
 
   if (!impl) {
     throw new Error(`[tanstack-router-testing] Middleware has no ${phase} phase registered.`);

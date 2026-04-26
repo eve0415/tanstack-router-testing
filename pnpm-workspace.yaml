@@ -6,5 +6,5 @@ preferWorkspacePackages: true
 # exist here. Each vendored app resolves its own deps on-demand when the
 # harness targets it. See vendor/VENDOR.md.
 packages:
-  - "packages/*"
-  - "!**/node_modules/**"
+  - 'packages/*'
+  - '!**/node_modules/**'

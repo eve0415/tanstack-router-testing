@@ -1,7 +1,7 @@
 import type { CreateTestRouterOptions } from './createTestRouter.ts';
 import type { RouterHistory } from '@tanstack/history';
 import type { AnyRouter, Router } from '@tanstack/react-router';
-import type { AnyRoute, AnyRouteMatch, TrailingSlashOption } from '@tanstack/router-core';
+import type { AnyRoute, AnyRouteMatch, NavigateOptions, RoutePaths, TrailingSlashOption } from '@tanstack/router-core';
 import type { ComponentType, ReactElement, ReactNode } from 'react';
 
 import { RouterProvider } from '@tanstack/react-router';
@@ -16,10 +16,7 @@ const resolveQueryClientProvider = async (): Promise<void> => {
     const mod = await import('@tanstack/react-query');
     _QueryClientProvider = mod.QueryClientProvider as ComponentType<{ client: object; children: ReactElement }>;
   } catch {
-    throw new Error(
-      '[tanstack-router-testing] queryClient option requires @tanstack/react-query. ' +
-        'Install it: pnpm add -D @tanstack/react-query',
-    );
+    throw new Error('[tanstack-router-testing] queryClient option requires @tanstack/react-query. Install it: pnpm add -D @tanstack/react-query');
   }
 };
 
@@ -43,10 +40,25 @@ const resolveQueryClientProvider = async (): Promise<void> => {
  * harness.getLoaderData({ routeId: '/posts/$postId' });
  * ```
  */
-export type RouteMatchTarget =
-  | string
-  | AnyRoute
-  | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
+export type RouteMatchTarget = string | AnyRoute | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
+
+type HarnessNavigate<TRouter extends AnyRouter> = <
+  TTo extends string | undefined,
+  TFrom extends RoutePaths<TRouter['routeTree']> | string = string,
+  TMaskFrom extends RoutePaths<TRouter['routeTree']> | string = TFrom,
+  TMaskTo extends string = '',
+>(
+  options: NavigateOptions<TRouter, TFrom, TTo, TMaskFrom, TMaskTo>,
+) => Promise<void>;
+
+type HarnessRedirect<TRouter extends AnyRouter> = <
+  TTo extends string | undefined,
+  TFrom extends RoutePaths<TRouter['routeTree']> | string = string,
+  TMaskFrom extends RoutePaths<TRouter['routeTree']> | string = TFrom,
+  TMaskTo extends string = '',
+>(
+  options: NavigateOptions<TRouter, TFrom, TTo, TMaskFrom, TMaskTo>,
+) => Promise<{ readonly pathname: string; readonly search: string; readonly hash: string } | undefined>;
 
 /**
  * Options for {@link createRouterHarness} when testing a single file-based route.
@@ -170,7 +182,7 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * expect(harness.getParams('/posts/$postId')).toEqual({ postId: '7' });
    * ```
    */
-  readonly navigate: (options: Parameters<TRouter['navigate']>[0]) => Promise<void>;
+  readonly navigate: HarnessNavigate<TRouter>;
 
   /**
    * Preload a route's code-split chunks and loaders without navigating.
@@ -363,9 +375,7 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * });
    * ```
    */
-  readonly getRedirect: (options: Parameters<TRouter['navigate']>[0]) => Promise<
-    { readonly pathname: string; readonly search: string; readonly hash: string } | undefined
-  >;
+  readonly getRedirect: HarnessRedirect<TRouter>;
 
   /**
    * Tear down the router, cancelling pending matches and destroying the
@@ -473,7 +483,9 @@ const createFileRouteHarness = (options: FileRouteHarnessOptions): RouterHarness
     const routeOpts = route.options as unknown as Record<string, unknown>;
     const originalLoader = routeOpts.loader;
     routeOpts.loader = () => loaderData;
-    restoreLoader = () => { routeOpts.loader = originalLoader; };
+    restoreLoader = () => {
+      routeOpts.loader = originalLoader;
+    };
   }
 
   const router = createTestRouter({
@@ -507,7 +519,9 @@ const buildHarness = (router: AnyRouter, queryClient: object | undefined, target
           {children}
         </>
       );
-      restoreComponent = () => { rOpts.component = OriginalComponent; };
+      restoreComponent = () => {
+        rOpts.component = OriginalComponent;
+      };
     }
     const provider = <RouterProvider router={router} />;
     if (!queryClient || !_QueryClientProvider) return provider;
@@ -528,7 +542,9 @@ const buildHarness = (router: AnyRouter, queryClient: object | undefined, target
       if (queryClient) await resolveQueryClientProvider();
       await router.load();
     },
-    navigate: async options => { await router.navigate(options); },
+    navigate: async options => {
+      await router.navigate(options);
+    },
     preload: options => router.preloadRoute(options) as Promise<readonly AnyRouteMatch[] | undefined>,
     match: href => {
       const url = new URL(href, 'http://tanstack-router-testing.test');
@@ -554,10 +570,9 @@ const buildHarness = (router: AnyRouter, queryClient: object | undefined, target
       restoreComponent?.();
     },
   };
-}
+};
 
-const isRouteObject = (target: RouteMatchTarget): target is AnyRoute =>
-  typeof target === 'object' && 'isRoot' in target;
+const isRouteObject = (target: RouteMatchTarget): target is AnyRoute => typeof target === 'object' && 'isRoot' in target;
 
 const getRouteId = (target: RouteMatchTarget): string => {
   if (typeof target === 'string') return target;
@@ -565,11 +580,7 @@ const getRouteId = (target: RouteMatchTarget): string => {
   return target.id ?? target.routeId ?? target.fullPath ?? '';
 };
 
-const buildUrlFromRoute = (
-  route: AnyRoute,
-  params?: Record<string, string>,
-  search?: Record<string, unknown>,
-): string => {
+const buildUrlFromRoute = (route: AnyRoute, params?: Record<string, string>, search?: Record<string, unknown>): string => {
   const fullPath = computeFullPath(route);
   let url = fullPath.replaceAll(/\$([a-zA-Z_]\w*)/g, (_match, paramName: string) => {
     const value = params?.[paramName];

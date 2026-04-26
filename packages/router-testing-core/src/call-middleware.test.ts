@@ -2,8 +2,8 @@ import type { AnyFn } from './server-fn-registry.ts';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { __resetMiddlewareRegistry, registerMiddleware, setMiddlewareMock } from './middleware-registry.ts';
 import { callMiddleware } from './call-middleware.ts';
+import { __resetMiddlewareRegistry, registerMiddleware, setMiddlewareMock } from './middleware-registry.ts';
 
 describe('callMiddleware', () => {
   afterEach(() => {

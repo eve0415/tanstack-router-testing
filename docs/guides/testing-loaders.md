@@ -139,7 +139,7 @@ import { Route } from './routes/posts.$postId';
 it('loads a file-based route with typed params', async () => {
   const harness = createRouterHarness({
     route: Route,
-    params: { postId: '42' },  // fully typed
+    params: { postId: '42' }, // fully typed
   });
   await harness.load();
 
@@ -172,7 +172,7 @@ import { Route as SearchRoute } from './routes/search';
 it('passes typed search params', async () => {
   const harness = createRouterHarness({
     route: SearchRoute,
-    search: { page: 3 },  // typed from validateSearch
+    search: { page: 3 }, // typed from validateSearch
   });
   await harness.load();
 

@@ -145,9 +145,7 @@ it('handles server function errors', async () => {
     throw new Error('Database connection failed');
   });
 
-  await expect(listOrders({ data: { userId: 'u1' } })).rejects.toThrow(
-    'Database connection failed',
-  );
+  await expect(listOrders({ data: { userId: 'u1' } })).rejects.toThrow('Database connection failed');
 });
 ```
 

@@ -11,12 +11,7 @@ export { type AnyServerFn, mockServerFn, type ServerFnMock } from './mockServerF
 export { type MockMiddlewareOptions, mockMiddleware } from './mockMiddleware.ts';
 export { runInStartEnv } from './isomorphic.ts';
 export { createRscTestRuntime, type RscRenderResult, type RscTestRuntime, type RscTestRuntimeOptions } from './rsc.tsx';
-export {
-  createStartTestRuntime,
-  type StartTestRuntime,
-  type StartTestRuntimeOptions,
-  type StartTestRunOptions,
-} from './runtime.ts';
+export { createStartTestRuntime, type StartTestRuntime, type StartTestRuntimeOptions, type StartTestRunOptions } from './runtime.ts';
 
 /**
  * Current package version. Bumped at release time.

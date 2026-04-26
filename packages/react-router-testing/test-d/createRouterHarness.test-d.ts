@@ -1,11 +1,10 @@
-import { expectTypeOf } from 'vitest';
-
+import type { RouterHarness } from '../src/index.ts';
 import type { AnyRouteMatch } from '@tanstack/router-core';
 
 import { createRootRoute, createRoute } from '@tanstack/react-router';
+import { expectTypeOf } from 'vitest';
 
 import { createRouterHarness } from '../src/index.ts';
-import type { RouterHarness } from '../src/index.ts';
 
 const rootRoute = createRootRoute();
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/' });
@@ -29,7 +28,7 @@ expectTypeOf(harness.getParams).returns.toBeUnknown();
 expectTypeOf(harness.getError).returns.toBeUnknown();
 
 // getRedirect returns a promise of location or undefined.
-expectTypeOf(harness.getRedirect).returns.resolves.toEqualTypeOf<
+expectTypeOf(harness.getRedirect({ to: '/' })).resolves.toEqualTypeOf<
   { readonly pathname: string; readonly search: string; readonly hash: string } | undefined
 >();
 

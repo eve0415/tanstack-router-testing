@@ -1,8 +1,8 @@
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 
 // ---------------------------------------------------------------------------
 // Route tree with react-query integration

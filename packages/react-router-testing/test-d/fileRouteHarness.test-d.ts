@@ -1,9 +1,9 @@
-import { expectTypeOf } from 'vitest';
+import type { FileRouteHarnessOptions } from '../src/index.ts';
 
 import { createRootRoute, createRoute } from '@tanstack/react-router';
+import { expectTypeOf } from 'vitest';
 
 import { createRouterHarness } from '../src/index.ts';
-import type { FileRouteHarnessOptions } from '../src/index.ts';
 
 const rootRoute = createRootRoute();
 
@@ -21,16 +21,13 @@ const typedRoute = createRoute({
 rootRoute.addChildren([typedRoute]);
 
 // FileRouteHarnessOptions infers params from route.
-expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['params']>()
-  .toEqualTypeOf<{ postId: string } | undefined>();
+expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['params']>().toEqualTypeOf<{ postId: string } | undefined>();
 
 // FileRouteHarnessOptions infers search from route.
-expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['search']>()
-  .toEqualTypeOf<{ page: number } | undefined>();
+expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['search']>().toEqualTypeOf<{ page: number } | undefined>();
 
 // FileRouteHarnessOptions infers loaderData from route.
-expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['loaderData']>()
-  .toEqualTypeOf<{ post: { id: string; title: string } } | undefined>();
+expectTypeOf<FileRouteHarnessOptions<typeof typedRoute>['loaderData']>().toEqualTypeOf<{ post: { id: string; title: string } } | undefined>();
 
 // createRouterHarness with route option returns RouterHarness.
 const harness = createRouterHarness({

@@ -74,13 +74,7 @@ const errorRoute = createRoute({
 
 describe('createRouterHarness with route option', () => {
   beforeAll(() => {
-    rootRoute.addChildren([
-      postsLayout.addChildren([postDetail]),
-      searchRoute,
-      guardedRoute,
-      loginRoute,
-      errorRoute,
-    ]);
+    rootRoute.addChildren([postsLayout.addChildren([postDetail]), searchRoute, guardedRoute, loginRoute, errorRoute]);
   });
 
   afterEach(cleanup);
@@ -180,7 +174,7 @@ describe('createRouterHarness with route option', () => {
   it('renders children inside TestRouterProvider for independent components', async () => {
     const PostTitle = () => {
       const data = postDetail.useLoaderData();
-      return <span data-testid="title">{data.post.title}</span>;
+      return <span data-testid='title'>{data.post.title}</span>;
     };
 
     const { TestRouterProvider } = createRouterHarness({

@@ -45,7 +45,7 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
   const routerPlugins = tanstackRouter(routerPluginOptions);
   const plugins: Plugin[] = [
     ...(Array.isArray(routerPlugins) ? routerPlugins : [routerPlugins]),
-    ...(options.rsc ? [tanstackStartRscTestingRuntime()] : []),
+    ...(options.rsc === true ? [tanstackStartRscTestingRuntime()] : []),
     {
       name: '@tanstack/react-start/testing',
       config(): UserConfig & { test: { setupFiles: readonly string[] } } {
@@ -79,8 +79,7 @@ const RESOLVED_VIRTUAL_RSC_RUNTIME = '\0@tanstack/react-start/testing/rsc-runtim
 const tanstackStartRscTestingRuntime = (): Plugin => ({
   name: '@tanstack/react-start/testing-rsc-runtime',
   resolveId(id) {
-    if (id === VIRTUAL_RSC_RUNTIME) return RESOLVED_VIRTUAL_RSC_RUNTIME;
-    return;
+    return id === VIRTUAL_RSC_RUNTIME ? RESOLVED_VIRTUAL_RSC_RUNTIME : undefined;
   },
   load(id) {
     if (id !== RESOLVED_VIRTUAL_RSC_RUNTIME) return;

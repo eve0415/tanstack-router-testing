@@ -1,7 +1,8 @@
+import type { RscRenderResult, RscTestRuntime, StartTestRuntime } from '../src/index.ts';
+
 import { expectTypeOf } from 'vitest';
 
 import { createRscTestRuntime, createStartTestRuntime } from '../src/index.ts';
-import type { RscRenderResult, RscTestRuntime, StartTestRuntime } from '../src/index.ts';
 
 // createStartTestRuntime returns a Promise<StartTestRuntime>.
 expectTypeOf(createStartTestRuntime).returns.resolves.toExtend<StartTestRuntime>();

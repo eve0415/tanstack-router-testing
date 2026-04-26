@@ -2,17 +2,21 @@
   "name": "@tanstack-router-testing/react-start-testing",
   "version": "0.0.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-start: direct server function tests, mocks, env control, and Vitest wiring.",
+  "keywords": [
+    "react",
+    "server-functions",
+    "start",
+    "tanstack",
+    "testing",
+    "vitest"
+  ],
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
+  "author": "eve0415",
   "repository": {
     "type": "git",
     "url": "https://github.com/eve0415/tanstack-router-testing.git",
     "directory": "packages/react-start-testing"
   },
-  "author": "eve0415",
-  "keywords": ["tanstack", "start", "react", "testing", "vitest", "server-functions"],
   "files": [
     "dist",
     "!**/*.tsbuildinfo"
@@ -34,6 +38,9 @@
       "types": "./dist/vite.d.mts",
       "import": "./dist/vite.mjs"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsdown",

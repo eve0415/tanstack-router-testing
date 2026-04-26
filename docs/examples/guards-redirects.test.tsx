@@ -1,6 +1,6 @@
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 import { createRootRoute, createRoute, redirect } from '@tanstack/react-router';
 import { describe, expect, it } from 'vitest';
-import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 
 // ---------------------------------------------------------------------------
 // Route tree with guards, redirects, and error scenarios
@@ -57,13 +57,7 @@ const contextRoute = createRoute({
   component: () => <p>Context route</p>,
 });
 
-const routeTree = rootRoute.addChildren([
-  loginRoute,
-  dashboardRoute,
-  adminRoute,
-  failRoute,
-  contextRoute,
-]);
+const routeTree = rootRoute.addChildren([loginRoute, dashboardRoute, adminRoute, failRoute, contextRoute]);
 
 // ---------------------------------------------------------------------------
 // Tests

@@ -1,13 +1,9 @@
+import { callMiddleware, clearStartMocks, mockMiddleware } from '@tanstack-router-testing/react-start-testing';
 // NOTE: Requires the Vite plugin from '@tanstack-router-testing/react-start-testing/vite'
 // so that `@tanstack/react-start` imports resolve to the test shim (which auto-registers
 // middleware). See tanstackStartTesting() in your vitest/vite config.
 import { createMiddleware } from '@tanstack/react-start';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  callMiddleware,
-  clearStartMocks,
-  mockMiddleware,
-} from '@tanstack-router-testing/react-start-testing';
 
 // ---------------------------------------------------------------------------
 // Middleware under test
@@ -23,13 +19,12 @@ const authMiddleware = createMiddleware()
     return next();
   });
 
-const loggingMiddleware = createMiddleware()
-  .server(async ({ next, context }) => {
-    const start = Date.now();
-    const result = await next();
-    const elapsed = Date.now() - start;
-    return { ...result, context: { ...context, elapsed } };
-  });
+const loggingMiddleware = createMiddleware().server(async ({ next, context }) => {
+  const start = Date.now();
+  const result = await next();
+  const elapsed = Date.now() - start;
+  return { ...result, context: { ...context, elapsed } };
+});
 
 // ---------------------------------------------------------------------------
 // Tests

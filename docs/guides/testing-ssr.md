@@ -21,7 +21,7 @@ SSR tests need a `createRouter` factory function, not a pre-built router instanc
 ```tsx
 const rootRoute = createRootRoute({
   component: () => (
-    <div id="root">
+    <div id='root'>
       <Outlet />
     </div>
   ),

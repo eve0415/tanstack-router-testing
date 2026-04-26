@@ -1,6 +1,6 @@
+import { createRscTestRuntime } from '@tanstack-router-testing/react-start-testing';
 import React, { Suspense } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createRscTestRuntime } from '@tanstack-router-testing/react-start-testing';
 
 // ---------------------------------------------------------------------------
 // Server components under test
@@ -12,7 +12,7 @@ function Greeting({ name }: { name: string }) {
 
 function UserCard({ userId, role }: { userId: string; role: string }) {
   return (
-    <div data-testid="user-card">
+    <div data-testid='user-card'>
       <span>{userId}</span>
       <span>{role}</span>
     </div>
@@ -38,10 +38,7 @@ describe('createRscTestRuntime — string mode (default)', () => {
   it('renders a server component to HTML', async () => {
     const runtime = await createRscTestRuntime();
 
-    const { html, stream, chunks } = await runtime.renderServerComponent(
-      Greeting,
-      { name: 'TanStack' },
-    );
+    const { html, stream, chunks } = await runtime.renderServerComponent(Greeting, { name: 'TanStack' });
 
     expect(html).toContain('Hello, TanStack!');
     expect(stream).toBeNull();
@@ -75,10 +72,7 @@ describe('createRscTestRuntime — streaming mode', () => {
   it('returns a readable stream and collected chunks', async () => {
     runtime = await createRscTestRuntime({ streaming: true });
 
-    const { html, stream, chunks } = await runtime.renderServerComponent(
-      Greeting,
-      { name: 'Stream' },
-    );
+    const { html, stream, chunks } = await runtime.renderServerComponent(Greeting, { name: 'Stream' });
 
     expect(html).toContain('Hello, Stream!');
     expect(stream).toBeInstanceOf(ReadableStream);
@@ -89,10 +83,7 @@ describe('createRscTestRuntime — streaming mode', () => {
   it('streams a component that uses Suspense', async () => {
     runtime = await createRscTestRuntime({ streaming: true });
 
-    const { html, chunks } = await runtime.renderServerComponent(
-      PageWithSuspense,
-      { title: 'Dashboard' },
-    );
+    const { html, chunks } = await runtime.renderServerComponent(PageWithSuspense, { title: 'Dashboard' });
 
     expect(html).toContain('Dashboard');
     expect(html).toContain('Content for Dashboard');

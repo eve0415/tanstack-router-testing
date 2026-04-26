@@ -9,10 +9,10 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-// Side-effect import wires up getParentRoute/path/id on all routes
-import { routeTree } from '../../../../vendor/examples/react/basic-file-based/src/routeTree.gen.ts';
 import { Route as IndexRoute } from '../../../../vendor/examples/react/basic-file-based/src/routes/index.tsx';
 import { Route as PostRoute } from '../../../../vendor/examples/react/basic-file-based/src/routes/posts.$postId.tsx';
+// Side-effect import wires up getParentRoute/path/id on all routes
+import { routeTree } from '../../../../vendor/examples/react/basic-file-based/src/routeTree.gen.ts';
 import { createRouterHarness } from '../../src/index.ts';
 
 describe('vendored integration: examples/react/basic-file-based', () => {

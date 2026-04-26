@@ -7,6 +7,7 @@ This project provides unit testing utilities for TanStack Router and TanStack St
 The library allows users to write unit tests by installing required packages and writing test code — no workarounds. The goal is to eventually contribute upstream to `tanstack/router` so testing ships out of the box. All APIs mirror TanStack's own patterns (options objects, builder pattern, generics-first type inference, discriminated unions).
 
 **Key interview decisions:**
+
 - **4 published packages:** `router-testing-core` (transitive), `react-router-testing`, `react-start-testing` (with `./vite` subpath for Vitest plugin), `react-start-testing-storybook`
 - **Scope:** `@tanstack-router-testing/`
 - **Build on existing code**, refactor where decisions diverge
@@ -30,11 +31,13 @@ The library allows users to write unit tests by installing required packages and
 ## Research Findings
 
 **TanStack ecosystem testing gap:**
+
 - No official testing utilities for TanStack Start. Router has minimal docs (basic `createMemoryHistory` + `RouterProvider`).
 - Community pain points: lazy route testing, server fn mocking, ~500ms overhead per test from pending delays, file route export mangling.
 - TanStack's own test approach: real router instances, no mocking. Same philosophy adopted here.
 
 **TanStack API patterns:**
+
 - Factory functions with options objects (`createRouter({ routeTree, ... })`)
 - Builder pattern for server fns (`createServerFn({ method }).handler(fn)`)
 - Discriminated unions for mutual exclusivity
@@ -42,10 +45,12 @@ The library allows users to write unit tests by installing required packages and
 - `router-core` / `start-client-core` as framework-agnostic published dependencies
 
 **TanStack Query testing reference:**
+
 - Uses `QueryClientProvider` wrapper, `renderHook`, `waitFor`
 - Focuses on real behavior over mocking — same philosophy here
 
 **Key references:**
+
 - [TanStack Router testing docs](https://tanstack.com/router/latest/docs/framework/react/how-to/setup-testing)
 - [Testing proposal #4569](https://github.com/TanStack/router/issues/4569)
 - [Testing docs request #5727](https://github.com/TanStack/router/discussions/5727)
@@ -87,6 +92,7 @@ The library allows users to write unit tests by installing required packages and
 #### Task 1: Publish `router-testing-core` (remove `private: true`, add metadata)
 
 **Files:**
+
 - Modify: `packages/router-testing-core/package.json`
 
 - [ ] **Step 1:** Remove `"private": true` from `packages/router-testing-core/package.json`
@@ -113,6 +119,7 @@ The library allows users to write unit tests by installing required packages and
 The `router-testing-plugin` package is redundant — identical functionality already exists in `react-start-testing/src/vite.ts` with better TSDoc.
 
 **Files:**
+
 - Delete: `packages/router-testing-plugin/` (entire directory)
 - Modify: `pnpm-workspace.yaml` (if it references this package)
 - Modify: Any files that import from `@tanstack-router-testing/router-testing-plugin`
@@ -133,17 +140,13 @@ The `router-testing-plugin` package is redundant — identical functionality alr
 SSR harness exists at `packages/react-router-testing/src/ssr.tsx` but is not exported from the main index. The `./ssr` subpath export exists in `package.json` but the main `index.ts` should document its existence.
 
 **Files:**
+
 - Modify: `packages/react-router-testing/src/index.ts`
 
 - [ ] **Step 1:** Add SSR re-exports to `packages/react-router-testing/src/index.ts`. The SSR module stays as a separate subpath export (`./ssr`) since it pulls in `react-dom/server` which not all users need. But the types should be accessible from the main entry point for discoverability:
   ```ts
   // Add to index.ts — types only, runtime via ./ssr subpath
-  export type {
-    CreateRouterSsrHarnessOptions,
-    HydrateRouterSsrOptions,
-    RouterSsrHarness,
-    RouterSsrMode,
-  } from './ssr.tsx';
+  export type { CreateRouterSsrHarnessOptions, HydrateRouterSsrOptions, RouterSsrHarness, RouterSsrMode } from './ssr.tsx';
   ```
 - [ ] **Step 2:** Verify build: `pnpm run build`
 - [ ] **Step 3:** Verify type check: `cd packages/react-router-testing && pnpm test:types`
@@ -158,6 +161,7 @@ SSR harness exists at `packages/react-router-testing/src/ssr.tsx` but is not exp
 Add a method to inspect error state on route matches. TanStack Router stores errors on `match.error`.
 
 **Files:**
+
 - Modify: `packages/react-router-testing/src/createRouterHarness.tsx`
 - Test: `packages/react-router-testing/tests/integration/harness.test.tsx`
 
@@ -169,7 +173,9 @@ Add a method to inspect error state on route matches. TanStack Router stores err
     const failRoute = createRoute({
       getParentRoute: () => rootRoute,
       path: '/fail',
-      loader: () => { throw error; },
+      loader: () => {
+        throw error;
+      },
       errorComponent: () => <div>Error</div>,
     });
     const tree = rootRoute.addChildren([failRoute]);
@@ -187,6 +193,7 @@ Add a method to inspect error state on route matches. TanStack Router stores err
   cd packages/react-router-testing && pnpm vitest run tests/integration/harness.test.tsx
   ```
 - [ ] **Step 3: Implement** — Add `getError` to `RouterHarness` interface and implementation:
+
   ```tsx
   // In RouterHarness interface:
   readonly getError: (target: RouteMatchTarget) => unknown;
@@ -194,6 +201,7 @@ Add a method to inspect error state on route matches. TanStack Router stores err
   // In createRouterHarness return:
   getError: target => findMatch(target)?.error,
   ```
+
 - [ ] **Step 4:** Run test, verify it passes
 - [ ] **Step 5:** Commit: `feat(react-router-testing): add getError() to RouterHarness`
 
@@ -202,6 +210,7 @@ Add a method to inspect error state on route matches. TanStack Router stores err
 Add a helper that navigates to a route and returns the final location if the router redirected. This wraps the navigate-then-inspect pattern.
 
 **Files:**
+
 - Modify: `packages/react-router-testing/src/createRouterHarness.tsx`
 - Test: `packages/react-router-testing/tests/integration/harness.test.tsx`
 
@@ -212,7 +221,9 @@ Add a helper that navigates to a route and returns the final location if the rou
     const protectedRoute = createRoute({
       getParentRoute: () => rootRoute,
       path: '/protected',
-      beforeLoad: () => { throw redirect({ to: '/login' }); },
+      beforeLoad: () => {
+        throw redirect({ to: '/login' });
+      },
     });
     const loginRoute = createRoute({
       getParentRoute: () => rootRoute,
@@ -233,6 +244,7 @@ Add a helper that navigates to a route and returns the final location if the rou
   ```
 - [ ] **Step 2:** Run test, verify it fails
 - [ ] **Step 3: Implement** — `getRedirect` navigates and checks if the final location differs:
+
   ```tsx
   // In RouterHarness interface:
   readonly getRedirect: (options: Parameters<TRouter['navigate']>[0]) => Promise<{ pathname: string; search: string; hash: string } | undefined>;
@@ -246,7 +258,9 @@ Add a helper that navigates to a route and returns the final location if the rou
     return { pathname: after.pathname, search: after.searchStr, hash: after.hash };
   },
   ```
+
   Note: The exact implementation needs to handle TanStack Router's redirect mechanism. Router catches `redirect()` throws in `beforeLoad` and navigates to the redirect target. After `router.navigate()` settles, the location reflects the final destination, not the intended one. Compare the settled location to the originally requested path.
+
 - [ ] **Step 4:** Run test, verify it passes
 - [ ] **Step 5:** Commit: `feat(react-router-testing): add getRedirect() to RouterHarness`
 
@@ -255,6 +269,7 @@ Add a helper that navigates to a route and returns the final location if the rou
 Accept an optional `QueryClient` in `createTestRouter` and `createRouterHarness` options. When provided, `TestRouterProvider` wraps in `QueryClientProvider`.
 
 **Files:**
+
 - Modify: `packages/react-router-testing/src/createTestRouter.ts`
 - Modify: `packages/react-router-testing/src/createRouterHarness.tsx`
 - Modify: `packages/react-router-testing/package.json` (add `@tanstack/react-query` as optional peer dep)
@@ -267,7 +282,7 @@ Accept an optional `QueryClient` in `createTestRouter` and `createRouterHarness`
     const rootRoute = createRootRoute({
       component: () => {
         const qc = useQueryClient();
-        return <div data-testid="has-query">{qc ? 'yes' : 'no'}</div>;
+        return <div data-testid='has-query'>{qc ? 'yes' : 'no'}</div>;
       },
     });
     const tree = rootRoute.addChildren([]);
@@ -304,11 +319,13 @@ Accept an optional `QueryClient` in `createTestRouter` and `createRouterHarness`
 Allow calling a middleware directly with a test context and fake `next()`, without needing a full router.
 
 **Files:**
+
 - Create: `packages/router-testing-core/src/call-middleware.ts`
 - Modify: `packages/router-testing-core/src/index.ts`
 - Test: `packages/router-testing-core/src/call-middleware.test.ts`
 
 - [ ] **Step 1: Write failing test**
+
   ```ts
   import { describe, expect, it } from 'vitest';
   import { callMiddleware, registerMiddleware } from './index.ts';
@@ -339,15 +356,13 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
 
     it('throws if middleware not registered', async () => {
       const mw = {};
-      await expect(callMiddleware(mw, { phase: 'server', context: {} }))
-        .rejects.toThrow('not registered');
+      await expect(callMiddleware(mw, { phase: 'server', context: {} })).rejects.toThrow('not registered');
     });
 
     it('throws if requested phase does not exist', async () => {
       const mw = {};
       registerMiddleware(mw, { server: async ({ next }) => next() });
-      await expect(callMiddleware(mw, { phase: 'client', context: {} }))
-        .rejects.toThrow('no client phase');
+      await expect(callMiddleware(mw, { phase: 'client', context: {} })).rejects.toThrow('no client phase');
     });
 
     it('uses mock phase when set', async () => {
@@ -360,8 +375,10 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
     });
   });
   ```
+
 - [ ] **Step 2:** Run test, verify it fails
 - [ ] **Step 3: Implement**
+
   ```ts
   // packages/router-testing-core/src/call-middleware.ts
   import type { AnyFn } from './server-fn-registry.ts';
@@ -381,21 +398,14 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
   export const callMiddleware = async (mw: object, options: CallMiddlewareOptions): Promise<CallMiddlewareResult> => {
     const entry = getMiddlewareEntry(mw);
     if (!entry) {
-      throw new Error(
-        '[tanstack-router-testing] Cannot call an unregistered middleware. ' +
-        'Register it with registerMiddleware() first.'
-      );
+      throw new Error('[tanstack-router-testing] Cannot call an unregistered middleware. ' + 'Register it with registerMiddleware() first.');
     }
 
     const phase = options.phase;
-    const impl: AnyFn | undefined = phase === 'server'
-      ? (entry.mockServer ?? entry.originalServer)
-      : (entry.mockClient ?? entry.originalClient);
+    const impl: AnyFn | undefined = phase === 'server' ? (entry.mockServer ?? entry.originalServer) : (entry.mockClient ?? entry.originalClient);
 
     if (!impl) {
-      throw new Error(
-        `[tanstack-router-testing] Middleware has no ${phase} phase registered.`
-      );
+      throw new Error(`[tanstack-router-testing] Middleware has no ${phase} phase registered.`);
     }
 
     let finalContext: unknown = options.context ?? {};
@@ -416,6 +426,7 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
     return { context: finalContext };
   };
   ```
+
 - [ ] **Step 4:** Export from `packages/router-testing-core/src/index.ts`
 - [ ] **Step 5:** Run test, verify it passes
 - [ ] **Step 6:** Commit: `feat(router-testing-core): add callMiddleware() for isolated middleware testing`
@@ -423,6 +434,7 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
 #### Task 8: Add `callMiddleware()` re-export to `react-start-testing`
 
 **Files:**
+
 - Modify: `packages/react-start-testing/src/index.ts`
 
 - [ ] **Step 1:** Re-export `callMiddleware` and its types from `react-start-testing`:
@@ -441,12 +453,14 @@ Allow calling a middleware directly with a test context and fake `next()`, witho
 Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper RSC-specific runtime that supports rendering server components, streaming, suspense boundaries, and server/client component interleaving validation.
 
 **Files:**
+
 - Create: `packages/react-start-testing/src/rsc.tsx`
 - Modify: `packages/react-start-testing/src/index.ts`
 - Modify: `packages/react-start-testing/src/runtime.ts` (remove alias)
 - Test: `packages/react-start-testing/tests/integration/rsc.test.tsx`
 
 - [ ] **Step 1: Design RSC harness interface**
+
   ```ts
   export interface RscTestRuntimeOptions extends StartTestRuntimeOptions {
     readonly streaming?: boolean;
@@ -461,13 +475,11 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
   }
 
   export interface RscTestRuntime extends StartTestRuntime {
-    readonly renderServerComponent: <TProps>(
-      component: React.ComponentType<TProps>,
-      props: TProps,
-    ) => Promise<RscRenderResult>;
+    readonly renderServerComponent: <TProps>(component: React.ComponentType<TProps>, props: TProps) => Promise<RscRenderResult>;
     readonly assertNoClientComponentViolation: (element: React.ReactElement) => void;
   }
   ```
+
 - [ ] **Step 2: Write failing tests** for each RSC capability:
   - Render a server component and get HTML
   - Stream a server component and collect chunks
@@ -490,6 +502,7 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
 #### Task 10: RSC streaming test helpers
 
 **Files:**
+
 - Modify: `packages/react-start-testing/src/rsc.tsx`
 - Test: `packages/react-start-testing/tests/integration/rsc-streaming.test.tsx`
 
@@ -513,6 +526,7 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
 #### Task 11: RSC suspense boundary testing
 
 **Files:**
+
 - Modify: `packages/react-start-testing/src/rsc.tsx`
 - Test: `packages/react-start-testing/tests/integration/rsc-suspense.test.tsx`
 
@@ -543,22 +557,29 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
 #### Task 12: RSC server/client component interleaving validation
 
 **Files:**
+
 - Modify: `packages/react-start-testing/src/rsc.tsx`
 - Test: `packages/react-start-testing/tests/integration/rsc-boundaries.test.tsx`
 
 - [ ] **Step 1: Write failing test**
+
   ```tsx
   it('validates server/client component boundaries', () => {
     const runtime = createRscTestRuntime();
     // This should not throw — valid: server renders client component
-    expect(() => runtime.assertNoClientComponentViolation(
-      <ServerWrapper><ClientComponent /></ServerWrapper>
-    )).not.toThrow();
+    expect(() =>
+      runtime.assertNoClientComponentViolation(
+        <ServerWrapper>
+          <ClientComponent />
+        </ServerWrapper>,
+      ),
+    ).not.toThrow();
 
     // This should throw — invalid: client component renders server-only code
     // (Exact implementation depends on how TanStack Start marks boundaries)
   });
   ```
+
 - [ ] **Step 2:** Implement boundary validation
 - [ ] **Step 3:** Run test, verify it passes
 - [ ] **Step 4:** Commit: `feat(react-start-testing): add RSC boundary validation`
@@ -566,6 +587,7 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
 #### Task 13: RSC selective hydration testing
 
 **Files:**
+
 - Modify: `packages/react-start-testing/src/rsc.tsx`
 - Test: `packages/react-start-testing/tests/integration/rsc-hydration.test.tsx`
 
@@ -586,6 +608,7 @@ Replace the `createRscTestRuntime = createStartTestRuntime` alias with a proper 
 Every public function and type needs: summary, `@param`, `@returns`, `@example`. Use `@link` for cross-references and `@remarks` for gotchas.
 
 **Files to update (in order):**
+
 1. `packages/react-router-testing/src/createRouterHarness.tsx` — `createRouterHarness` function, `RouterHarness` interface (all methods), `RouteMatchTarget` type
 2. `packages/react-start-testing/src/mockServerFn.ts` — `mockServerFn`, `ServerFnMock`, `AnyServerFn`
 3. `packages/react-start-testing/src/mockMiddleware.ts` — `mockMiddleware` (add `@param`, `@returns`, `@example`)
@@ -597,7 +620,8 @@ Every public function and type needs: summary, `@param`, `@returns`, `@example`.
 9. `packages/react-start-testing-storybook/src/index.ts` — `withTanStackStart`, `TanStackStartStoryParameters`
 
 **TSDoc pattern to follow (already established in `router-testing-core`):**
-```ts
+
+````ts
 /**
  * One-line summary of what this does.
  *
@@ -613,7 +637,7 @@ Every public function and type needs: summary, `@param`, `@returns`, `@example`.
  * @remarks
  * Any gotchas or non-obvious behavior.
  */
-```
+````
 
 - [ ] **Step 1:** Update each file with complete TSDoc
 - [ ] **Step 2:** Verify type check passes: `pnpm run build && tsgo --noEmit` in each package
@@ -624,6 +648,7 @@ Every public function and type needs: summary, `@param`, `@returns`, `@example`.
 Add positive type assertions using Vitest's `expectTypeOf` to existing `test-d/` files and create new ones where missing.
 
 **Files:**
+
 - Modify: `packages/router-testing-core/test-d/history.test-d.ts`
 - Modify: `packages/router-testing-core/test-d/env.test-d.ts`
 - Modify: `packages/router-testing-core/test-d/server-fn-registry.test-d.ts`
@@ -635,6 +660,7 @@ Add positive type assertions using Vitest's `expectTypeOf` to existing `test-d/`
 - Create: `packages/router-testing-core/test-d/call-middleware.test-d.ts`
 
 **Configuration:** Vitest `expectTypeOf` works in typecheck mode. Ensure each package's `vitest.config.ts` has:
+
 ```ts
 export default defineConfig({
   test: {
@@ -647,6 +673,7 @@ export default defineConfig({
 ```
 
 **Example assertions to add:**
+
 ```ts
 // packages/react-router-testing/test-d/createRouterHarness.test-d.ts
 import { expectTypeOf, test } from 'vitest';
@@ -688,9 +715,11 @@ test('getMatch returns AnyRouteMatch or undefined', () => {
 #### Task 16: Write getting-started guide
 
 **Files:**
+
 - Create: `docs/getting-started.md`
 
 Cover:
+
 1. Install packages (`pnpm add -D @tanstack-router-testing/react-router-testing @tanstack-router-testing/react-start-testing`)
 2. Configure Vitest (`vitest.config.ts` with `tanstackStartTesting()` plugin)
 3. Write first test (create test router, render, assert)
@@ -702,9 +731,11 @@ Cover:
 #### Task 17: Write API reference
 
 **Files:**
+
 - Create: `docs/api-reference.md`
 
 Hand-written from TSDoc. Organized by package:
+
 1. `router-testing-core` — createTestHistory, env utilities, registries, callMiddleware
 2. `react-router-testing` — createTestRouter, createRouterHarness, RouterHarness methods, SSR harness
 3. `react-start-testing` — mockServerFn, mockMiddleware, clearStartMocks, runInStartEnv, createStartTestRuntime, createRscTestRuntime, Vite plugin
@@ -718,6 +749,7 @@ Each entry: signature, description, parameters, return type, example.
 #### Task 18: Write feature guides
 
 **Files:**
+
 - Create: `docs/guides/testing-loaders.md` — Testing route loaders and data fetching
 - Create: `docs/guides/testing-guards.md` — Testing beforeLoad, redirects, auth guards
 - Create: `docs/guides/testing-server-functions.md` — Mocking server functions with mockServerFn
@@ -734,6 +766,7 @@ Each guide: problem statement, setup, step-by-step example, common pitfalls.
 #### Task 19: Write example test files
 
 **Files:**
+
 - Create: `docs/examples/router-basics.test.tsx` — createTestRouter, createRouterHarness, navigate, getLoaderData
 - Create: `docs/examples/server-functions.test.tsx` — mockServerFn, clearStartMocks
 - Create: `docs/examples/middleware.test.tsx` — mockMiddleware, callMiddleware isolation
@@ -751,9 +784,11 @@ Each file is a complete, runnable Vitest test that demonstrates the feature.
 #### Task 20: Polish README
 
 **Files:**
+
 - Modify: `README.md`
 
 Update to reflect final package structure, remove phase checklist (no longer pre-release tracking), add:
+
 - Badges (npm version, CI status, license)
 - Quick install + first test example
 - Links to docs/guides
@@ -766,6 +801,7 @@ Update to reflect final package structure, remove phase checklist (no longer pre
 #### Task 21: Add per-package READMEs
 
 **Files:**
+
 - Create: `packages/router-testing-core/README.md`
 - Create: `packages/react-router-testing/README.md`
 - Create: `packages/react-start-testing/README.md`
@@ -783,6 +819,7 @@ Each: brief overview, install command, link to main docs.
 #### Task 22: Publish preparation
 
 **Files:**
+
 - Verify: All `package.json` files have `license`, `repository`, `author`, `keywords`
 - Verify: `LICENSE` file exists at root
 - Verify: `files` field in each `package.json` includes only `dist/`

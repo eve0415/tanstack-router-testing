@@ -34,10 +34,10 @@ interface CreateTestHistoryOptions {
 
 Options for `createTestHistory`. Forwards to `@tanstack/history`'s `createMemoryHistory` with test-friendly defaults.
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `initialEntries` | `readonly string[]` | `['/']` | Initial history entries. The last entry is active unless `initialIndex` is set. |
-| `initialIndex` | `number` | `initialEntries.length - 1` | Index into `initialEntries` to start at. Note: upstream uses a truthiness check, so passing `0` falls back to the last entry. Use a single-element array instead. |
+| Property         | Type                | Default                     | Description                                                                                                                                                       |
+| ---------------- | ------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initialEntries` | `readonly string[]` | `['/']`                     | Initial history entries. The last entry is active unless `initialIndex` is set.                                                                                   |
+| `initialIndex`   | `number`            | `initialEntries.length - 1` | Index into `initialEntries` to start at. Note: upstream uses a truthiness check, so passing `0` falls back to the last entry. Use a single-element array instead. |
 
 ---
 
@@ -62,10 +62,10 @@ interface ServerFnEntry {
 
 Registry entry for a single server function.
 
-| Property | Type | Description |
-|---|---|---|
-| `original` | `AnyFn` | The original handler registered via `createServerFn().handler(original)`. Never mutated after registration. |
-| `mock` | `AnyFn \| undefined` | When set, in-process dispatch calls this instead of `original`. |
+| Property   | Type                 | Description                                                                                                 |
+| ---------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `original` | `AnyFn`              | The original handler registered via `createServerFn().handler(original)`. Never mutated after registration. |
+| `mock`     | `AnyFn \| undefined` | When set, in-process dispatch calls this instead of `original`.                                             |
 
 ---
 
@@ -82,12 +82,12 @@ interface MiddlewareEntry {
 
 Registry entry for a single middleware object.
 
-| Property | Type | Description |
-|---|---|---|
+| Property         | Type                 | Description                                                                                |
+| ---------------- | -------------------- | ------------------------------------------------------------------------------------------ |
 | `originalClient` | `AnyFn \| undefined` | Original `.client()` implementation. `undefined` means the middleware has no client phase. |
-| `originalServer` | `AnyFn \| undefined` | Original `.server()` implementation. |
-| `mockClient` | `AnyFn \| undefined` | Replaces the client phase during in-process dispatch. |
-| `mockServer` | `AnyFn \| undefined` | Replaces the server phase during in-process dispatch. |
+| `originalServer` | `AnyFn \| undefined` | Original `.server()` implementation.                                                       |
+| `mockClient`     | `AnyFn \| undefined` | Replaces the client phase during in-process dispatch.                                      |
+| `mockServer`     | `AnyFn \| undefined` | Replaces the server phase during in-process dispatch.                                      |
 
 ---
 
@@ -116,11 +116,11 @@ interface CallMiddlewareOptions {
 
 Options for `callMiddleware`.
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `phase` | `'server' \| 'client'` | -- | Which middleware phase to invoke. |
-| `context` | `unknown` | `{}` | Initial context passed to the middleware. |
-| `request` | `Request` | Synthetic test request | Request object available inside the middleware. |
+| Property  | Type                   | Default                | Description                                     |
+| --------- | ---------------------- | ---------------------- | ----------------------------------------------- |
+| `phase`   | `'server' \| 'client'` | --                     | Which middleware phase to invoke.               |
+| `context` | `unknown`              | `{}`                   | Initial context passed to the middleware.       |
+| `request` | `Request`              | Synthetic test request | Request object available inside the middleware. |
 
 ---
 
@@ -150,8 +150,8 @@ Thin wrapper around `createMemoryHistory` -- its only job is to provide a defaul
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                       | Description                       |
+| --------- | -------------------------- | --------------------------------- |
 | `options` | `CreateTestHistoryOptions` | Memory-history options. Optional. |
 
 **Returns:** `RouterHistory` -- accepted directly by `@tanstack/react-router`'s `createRouter`.
@@ -204,9 +204,9 @@ Imperatively set the current environment. Prefer `runInEnv` over this -- it guar
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `env` | `TestEnv \| undefined` | The environment to simulate, or `undefined` to clear. |
+| Parameter | Type                   | Description                                           |
+| --------- | ---------------------- | ----------------------------------------------------- |
+| `env`     | `TestEnv \| undefined` | The environment to simulate, or `undefined` to clear. |
 
 ---
 
@@ -220,10 +220,10 @@ Run `fn` under a fixed environment, then restore the previous value. Restoration
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `env` | `TestEnv` | The environment to simulate for the duration of `fn`. |
-| `fn` | `() => T \| Promise<T>` | The callback to execute. May return a value or a `Promise`. |
+| Parameter | Type                    | Description                                                 |
+| --------- | ----------------------- | ----------------------------------------------------------- |
+| `env`     | `TestEnv`               | The environment to simulate for the duration of `fn`.       |
+| `fn`      | `() => T \| Promise<T>` | The callback to execute. May return a value or a `Promise`. |
 
 **Returns:** `Promise<T>` -- resolves to the value returned by `fn`.
 
@@ -247,10 +247,10 @@ Register a server function so tests can find, mock, or invoke its original handl
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `AnyFn` | The server-fn callable (value returned by `createServerFn().handler(original)`). |
-| `original` | `AnyFn` | The original handler passed to `.handler()`. |
+| Parameter  | Type    | Description                                                                      |
+| ---------- | ------- | -------------------------------------------------------------------------------- |
+| `fn`       | `AnyFn` | The server-fn callable (value returned by `createServerFn().handler(original)`). |
+| `original` | `AnyFn` | The original handler passed to `.handler()`.                                     |
 
 **Returns:** `ServerFnEntry` -- the registry entry for `fn`.
 
@@ -273,9 +273,9 @@ Fetch a server-fn's registry entry.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `AnyFn` | The server-fn callable. |
+| Parameter | Type    | Description             |
+| --------- | ------- | ----------------------- |
+| `fn`      | `AnyFn` | The server-fn callable. |
 
 **Returns:** The entry, or `undefined` if `fn` was never registered.
 
@@ -291,10 +291,10 @@ Install a mock handler for a server function. Returns a disposer that restores t
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `AnyFn` | The server-fn callable to mock. |
-| `mock` | `AnyFn \| undefined` | The replacement handler. Pass `undefined` to clear the mock. |
+| Parameter | Type                 | Description                                                  |
+| --------- | -------------------- | ------------------------------------------------------------ |
+| `fn`      | `AnyFn`              | The server-fn callable to mock.                              |
+| `mock`    | `AnyFn \| undefined` | The replacement handler. Pass `undefined` to clear the mock. |
 
 **Returns:** `() => void` -- a no-arg function that restores the prior state.
 
@@ -336,10 +336,10 @@ Register a middleware object so tests can mock its phase implementations. Idempo
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mw` | `object` | The middleware object (value returned by `createMiddleware`). |
-| `phases` | `{ client?: AnyFn; server?: AnyFn }` | Original `.client()` and `.server()` implementations, or `undefined` for phases the middleware doesn't provide. |
+| Parameter | Type                                 | Description                                                                                                     |
+| --------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `mw`      | `object`                             | The middleware object (value returned by `createMiddleware`).                                                   |
+| `phases`  | `{ client?: AnyFn; server?: AnyFn }` | Original `.client()` and `.server()` implementations, or `undefined` for phases the middleware doesn't provide. |
 
 **Returns:** `MiddlewareEntry` -- the registry entry for `mw`.
 
@@ -355,9 +355,9 @@ Fetch a middleware's registry entry.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mw` | `object` | The middleware object. |
+| Parameter | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| `mw`      | `object` | The middleware object. |
 
 **Returns:** The entry, or `undefined` if `mw` was never registered.
 
@@ -373,9 +373,9 @@ Override one or both phases of a middleware. Returns a disposer that restores th
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mw` | `object` | The middleware object to mock. |
+| Parameter | Type                    | Description                                                                     |
+| --------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `mw`      | `object`                | The middleware object to mock.                                                  |
 | `options` | `MiddlewareMockOptions` | Phase replacements. Provided keys are swapped; omitted keys are left untouched. |
 
 **Returns:** `() => void` -- a no-arg function that restores the prior state.
@@ -386,8 +386,7 @@ Override one or both phases of a middleware. Returns a disposer that restores th
 
 ```ts
 const restore = setMiddlewareMock(authMw, {
-  server: async ({ next, context }) =>
-    next({ context: { ...context, user: { id: 'u1' } } }),
+  server: async ({ next, context }) => next({ context: { ...context, user: { id: 'u1' } } }),
 });
 // ... test body ...
 restore();
@@ -415,10 +414,10 @@ Call a registered middleware in isolation, without a full router. Invokes the sp
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mw` | `object` | The middleware object returned by `createMiddleware`. Must be registered first. |
-| `options` | `CallMiddlewareOptions` | Phase, initial context, and optional request. |
+| Parameter | Type                    | Description                                                                     |
+| --------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `mw`      | `object`                | The middleware object returned by `createMiddleware`. Must be registered first. |
+| `options` | `CallMiddlewareOptions` | Phase, initial context, and optional request.                                   |
 
 **Returns:** `Promise<CallMiddlewareResult>` -- the resolved context after middleware execution.
 
@@ -488,24 +487,21 @@ interface FileRouteHarnessOptions<TRoute extends AnyRoute = AnyRoute> {
 
 Options for `createRouterHarness` when testing a single file-based route. All type parameters are inferred from the route, giving full autocomplete on `params`, `search`, and `loaderData`.
 
-| Property | Type | Description |
-|---|---|---|
-| `route` | `TRoute` | The file-based route to test. The harness walks to the root automatically. |
-| `params` | `TRoute['types']['allParams']` | Path params, fully typed from the route's path definition. |
-| `search` | `TRoute['types']['fullSearchSchema']` | Search params, fully typed from the route's `validateSearch`. |
-| `loaderData` | `TRoute['types']['loaderData']` | Override loader data instead of running the real loader. |
-| `context` | `Record<string, unknown>` | Router context passed to `beforeLoad` and `loader` functions. |
-| `queryClient` | `object` | Optional `QueryClient` for `@tanstack/react-query` integration. |
+| Property      | Type                                  | Description                                                                |
+| ------------- | ------------------------------------- | -------------------------------------------------------------------------- |
+| `route`       | `TRoute`                              | The file-based route to test. The harness walks to the root automatically. |
+| `params`      | `TRoute['types']['allParams']`        | Path params, fully typed from the route's path definition.                 |
+| `search`      | `TRoute['types']['fullSearchSchema']` | Search params, fully typed from the route's `validateSearch`.              |
+| `loaderData`  | `TRoute['types']['loaderData']`       | Override loader data instead of running the real loader.                   |
+| `context`     | `Record<string, unknown>`             | Router context passed to `beforeLoad` and `loader` functions.              |
+| `queryClient` | `object`                              | Optional `QueryClient` for `@tanstack/react-query` integration.            |
 
 ---
 
 #### `RouteMatchTarget`
 
 ```ts
-type RouteMatchTarget =
-  | string
-  | AnyRoute
-  | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
+type RouteMatchTarget = string | AnyRoute | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
 ```
 
 Identifies a route match inside the current router state. Pass a plain string to match against any of `id`, `routeId`, or `fullPath`. Pass a route object to match by its `id`. Pass an object to match a specific field.
@@ -530,7 +526,9 @@ interface RouterHarness<TRouter extends AnyRouter> {
   readonly getSearch: (target: RouteMatchTarget) => unknown;
   readonly getParams: (target: RouteMatchTarget) => unknown;
   readonly getError: (target: RouteMatchTarget) => unknown;
-  readonly getRedirect: (options: Parameters<TRouter['navigate']>[0]) => Promise<{ readonly pathname: string; readonly search: string; readonly hash: string } | undefined>;
+  readonly getRedirect: (
+    options: Parameters<TRouter['navigate']>[0],
+  ) => Promise<{ readonly pathname: string; readonly search: string; readonly hash: string } | undefined>;
   readonly cleanup: () => void;
 }
 ```
@@ -539,22 +537,22 @@ Facade returned by `createRouterHarness` for testing routes, loaders, guards, re
 
 **Members:**
 
-| Member | Type | Description |
-|---|---|---|
-| `router` | `TRouter` | The underlying router instance. Useful for low-level assertions on `router.state`. |
-| `TestRouterProvider` | `ComponentType<{ children?: ReactNode }>` | A React component wrapping `RouterProvider` (and optionally `QueryClientProvider`). Pass to `render()`. When using the `route` option, pass children to test independent components that call route hooks like `Route.useLoaderData()`. |
-| `load()` | `() => Promise<void>` | Load the router, resolving all matched route loaders and `beforeLoad` guards. Must be called before state accessors. |
-| `navigate(options)` | `(...) => Promise<void>` | Navigate and wait for the transition to settle. Navigation errors reject the returned promise. |
-| `preload(options)` | `(...) => Promise<AnyRouteMatch[] \| undefined>` | Preload a route's chunks and loaders without navigating. |
-| `match(href)` | `(href: string) => AnyRouteMatch[]` | Match a URL against the route tree without mutating router state. Does not trigger loaders or guards. |
-| `getMatch(target)` | `(...) => AnyRouteMatch \| undefined` | Find a single route match in `router.state.matches`. |
-| `getLoaderData(target)` | `(...) => unknown` | Retrieve loader data for a matched route. |
-| `getRouteContext(target)` | `(...) => unknown` | Retrieve the route context (populated by `beforeLoad` and parent routes). |
-| `getSearch(target)` | `(...) => unknown` | Retrieve validated search params. |
-| `getParams(target)` | `(...) => unknown` | Retrieve parsed route params. |
-| `getError(target)` | `(...) => unknown` | Retrieve the error thrown during loading. |
-| `getRedirect(options)` | `(...) => Promise<{pathname, search, hash} \| undefined>` | Navigate and detect whether a redirect occurred. Returns `undefined` if the router landed at the intended destination. |
-| `cleanup()` | `() => void` | Tear down the router, cancelling pending matches and destroying the history instance. Call in `afterEach`. |
+| Member                    | Type                                                      | Description                                                                                                                                                                                                                             |
+| ------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `router`                  | `TRouter`                                                 | The underlying router instance. Useful for low-level assertions on `router.state`.                                                                                                                                                      |
+| `TestRouterProvider`      | `ComponentType<{ children?: ReactNode }>`                 | A React component wrapping `RouterProvider` (and optionally `QueryClientProvider`). Pass to `render()`. When using the `route` option, pass children to test independent components that call route hooks like `Route.useLoaderData()`. |
+| `load()`                  | `() => Promise<void>`                                     | Load the router, resolving all matched route loaders and `beforeLoad` guards. Must be called before state accessors.                                                                                                                    |
+| `navigate(options)`       | `(...) => Promise<void>`                                  | Navigate and wait for the transition to settle. Navigation errors reject the returned promise.                                                                                                                                          |
+| `preload(options)`        | `(...) => Promise<AnyRouteMatch[] \| undefined>`          | Preload a route's chunks and loaders without navigating.                                                                                                                                                                                |
+| `match(href)`             | `(href: string) => AnyRouteMatch[]`                       | Match a URL against the route tree without mutating router state. Does not trigger loaders or guards.                                                                                                                                   |
+| `getMatch(target)`        | `(...) => AnyRouteMatch \| undefined`                     | Find a single route match in `router.state.matches`.                                                                                                                                                                                    |
+| `getLoaderData(target)`   | `(...) => unknown`                                        | Retrieve loader data for a matched route.                                                                                                                                                                                               |
+| `getRouteContext(target)` | `(...) => unknown`                                        | Retrieve the route context (populated by `beforeLoad` and parent routes).                                                                                                                                                               |
+| `getSearch(target)`       | `(...) => unknown`                                        | Retrieve validated search params.                                                                                                                                                                                                       |
+| `getParams(target)`       | `(...) => unknown`                                        | Retrieve parsed route params.                                                                                                                                                                                                           |
+| `getError(target)`        | `(...) => unknown`                                        | Retrieve the error thrown during loading.                                                                                                                                                                                               |
+| `getRedirect(options)`    | `(...) => Promise<{pathname, search, hash} \| undefined>` | Navigate and detect whether a redirect occurred. Returns `undefined` if the router landed at the intended destination.                                                                                                                  |
+| `cleanup()`               | `() => void`                                              | Tear down the router, cancelling pending matches and destroying the history instance. Call in `afterEach`.                                                                                                                              |
 
 ---
 
@@ -581,12 +579,12 @@ interface CreateRouterSsrHarnessOptions<TRouter extends AnyRouter> {
 }
 ```
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `createRouter` | `() => TRouter` | -- | Factory that creates the router instance for each SSR pass. |
-| `request` | `Request \| string \| URL` | `'http://tanstack-router-testing.test/'` | The incoming request to render. |
-| `mode` | `RouterSsrMode` | `'string'` | Render mode: `'string'` for `renderToString`, `'stream'` for `renderToStream`. |
-| `getRouterManifest` | `() => Manifest \| Promise<Manifest>` | -- | Optional manifest provider for code-split route loading. |
+| Property            | Type                                  | Default                                  | Description                                                                    |
+| ------------------- | ------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------ |
+| `createRouter`      | `() => TRouter`                       | --                                       | Factory that creates the router instance for each SSR pass.                    |
+| `request`           | `Request \| string \| URL`            | `'http://tanstack-router-testing.test/'` | The incoming request to render.                                                |
+| `mode`              | `RouterSsrMode`                       | `'string'`                               | Render mode: `'string'` for `renderToString`, `'stream'` for `renderToStream`. |
+| `getRouterManifest` | `() => Manifest \| Promise<Manifest>` | --                                       | Optional manifest provider for code-split route loading.                       |
 
 ---
 
@@ -601,10 +599,10 @@ interface HydrateRouterSsrOptions<TRouter extends AnyRouter> {
 
 Options for `RouterSsrHarness.hydrate()`.
 
-| Property | Type | Description |
-|---|---|---|
-| `createRouter` | `() => TRouter` | Override the router factory for hydration. Defaults to the one passed to `createRouterSsrHarness`. |
-| `container` | `Document \| Element` | DOM target for hydration. Defaults to `document`. |
+| Property       | Type                  | Description                                                                                        |
+| -------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
+| `createRouter` | `() => TRouter`       | Override the router factory for hydration. Defaults to the one passed to `createRouterSsrHarness`. |
+| `container`    | `Document \| Element` | DOM target for hydration. Defaults to `document`.                                                  |
 
 ---
 
@@ -628,14 +626,14 @@ interface RouterSsrHarness<TRouter extends AnyRouter> {
 
 Returned by `createRouterSsrHarness`. Provides the SSR-rendered HTML and a `hydrate()` method to test client-side hydration.
 
-| Member | Type | Description |
-|---|---|---|
-| `request` | `Request` | The request used for SSR. |
-| `router` | `TRouter` | The server-side router instance. |
-| `response` | `Response` | The full HTTP response from the request handler. |
-| `responseHeaders` | `Headers` | Response headers set during SSR. |
-| `html` | `string` | The rendered HTML string. |
-| `mode` | `RouterSsrMode` | The render mode used. |
+| Member              | Type                                          | Description                                                                                                                                        |
+| ------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `request`           | `Request`                                     | The request used for SSR.                                                                                                                          |
+| `router`            | `TRouter`                                     | The server-side router instance.                                                                                                                   |
+| `response`          | `Response`                                    | The full HTTP response from the request handler.                                                                                                   |
+| `responseHeaders`   | `Headers`                                     | Response headers set during SSR.                                                                                                                   |
+| `html`              | `string`                                      | The rendered HTML string.                                                                                                                          |
+| `mode`              | `RouterSsrMode`                               | The render mode used.                                                                                                                              |
 | `hydrate(options?)` | `(...) => Promise<{router, errors, unmount}>` | Hydrate the SSR output into a DOM container. Returns the client router, any console errors captured during hydration, and an `unmount()` function. |
 
 ---
@@ -661,8 +659,8 @@ The return type is fully generic: `router.navigate({ to })`, `router.state`, and
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                           | Description                                                                         |
+| --------- | ------------------------------ | ----------------------------------------------------------------------------------- |
 | `options` | `CreateTestRouterOptions<...>` | Router options. Pass either `history` or `initialEntries`/`initialIndex`, not both. |
 
 **Returns:** `Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>`
@@ -691,9 +689,7 @@ Two overloads: one for testing a single file-based route, one for a full route t
 **Overload 1: File route** (preferred for file-based routing)
 
 ```ts
-function createRouterHarness<TRoute extends AnyRoute>(
-  options: FileRouteHarnessOptions<TRoute>,
-): RouterHarness<AnyRouter>;
+function createRouterHarness<TRoute extends AnyRoute>(options: FileRouteHarnessOptions<TRoute>): RouterHarness<AnyRouter>;
 ```
 
 **Overload 2: Full route tree**
@@ -717,21 +713,21 @@ When `route` is provided, the harness automatically walks to the root, neuters a
 
 **Parameters (file route overload):**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `route` | `AnyRoute` | The file-based route to test. |
-| `params` | Typed from route | Path params. Fully typed from the route's path definition. |
-| `search` | Typed from route | Search params. Fully typed from `validateSearch`. |
-| `loaderData` | Typed from route | Override loader data. Skips the real loader. |
-| `context` | `Record<string, unknown>` | Router context for `beforeLoad`/`loader`. |
-| `queryClient` | `object` | Optional `QueryClient` instance. |
+| Parameter     | Type                      | Description                                                |
+| ------------- | ------------------------- | ---------------------------------------------------------- |
+| `route`       | `AnyRoute`                | The file-based route to test.                              |
+| `params`      | Typed from route          | Path params. Fully typed from the route's path definition. |
+| `search`      | Typed from route          | Search params. Fully typed from `validateSearch`.          |
+| `loaderData`  | Typed from route          | Override loader data. Skips the real loader.               |
+| `context`     | `Record<string, unknown>` | Router context for `beforeLoad`/`loader`.                  |
+| `queryClient` | `object`                  | Optional `QueryClient` instance.                           |
 
 **Parameters (route tree overload):**
 
 All options from `CreateTestRouterOptions` plus:
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter     | Type     | Description                                                                                                                     |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `queryClient` | `object` | Optional `QueryClient` instance. When provided, wraps `RouterProvider` with `QueryClientProvider` from `@tanstack/react-query`. |
 
 **Returns:** `RouterHarness<...>`
@@ -745,7 +741,7 @@ import { Route } from './routes/posts.$postId';
 
 const harness = createRouterHarness({
   route: Route,
-  params: { postId: '7' },  // fully typed
+  params: { postId: '7' }, // fully typed
 });
 await harness.load();
 
@@ -785,9 +781,9 @@ Walk from a route to its root ancestor via `getParentRoute`. Used internally by 
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `route` | `AnyRoute` | Any route in the tree (leaf or intermediate). |
+| Parameter | Type       | Description                                   |
+| --------- | ---------- | --------------------------------------------- |
+| `route`   | `AnyRoute` | Any route in the tree (leaf or intermediate). |
 
 **Returns:** `AnyRoute` -- the root route at the top of the parent chain.
 
@@ -803,9 +799,9 @@ Compute the full URL path for a route by walking up the parent chain.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `route` | `AnyRoute` | The route whose full path to compute. |
+| Parameter | Type       | Description                           |
+| --------- | ---------- | ------------------------------------- |
+| `route`   | `AnyRoute` | The route whose full path to compute. |
 
 **Returns:** `string` -- e.g. `'/posts/$postId'`.
 
@@ -821,8 +817,8 @@ Replace all ancestor loaders with `undefined` for test isolation. Ancestor `befo
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter     | Type       | Description                                          |
+| ------------- | ---------- | ---------------------------------------------------- |
 | `targetRoute` | `AnyRoute` | The route under test. Its own loader is kept intact. |
 
 **Returns:** `() => void` -- a cleanup function that restores original loaders.
@@ -834,17 +830,15 @@ Replace all ancestor loaders with `undefined` for test isolation. Ancestor `befo
 #### `createRouterSsrHarness(options)`
 
 ```ts
-function createRouterSsrHarness<TRouter extends AnyRouter>(
-  options: CreateRouterSsrHarnessOptions<TRouter>,
-): Promise<RouterSsrHarness<TRouter>>;
+function createRouterSsrHarness<TRouter extends AnyRouter>(options: CreateRouterSsrHarnessOptions<TRouter>): Promise<RouterSsrHarness<TRouter>>;
 ```
 
 Create a `RouterSsrHarness` for testing server-side rendering of a TanStack Router application. Executes the request handler, captures the rendered HTML, and provides a `hydrate()` method for testing client-side hydration.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                                     | Description                |
+| --------- | ---------------------------------------- | -------------------------- |
 | `options` | `CreateRouterSsrHarnessOptions<TRouter>` | SSR harness configuration. |
 
 **Returns:** `Promise<RouterSsrHarness<TRouter>>` -- async because the request handler runs during creation.
@@ -928,15 +922,15 @@ interface StartTestRuntimeOptions {
 
 Configuration for `createStartTestRuntime`.
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `startInstance` | `{ getOptions: () => ... }` | -- | A Start instance whose `getOptions()` is called once during creation. Ignored when `startOptions` is also provided. |
-| `startOptions` | `AnyStartInstanceOptions` | `{}` | Explicit Start options. Takes precedence over `startInstance`. |
-| `request` | `Request \| string \| URL` | `'http://tanstack-router-testing.test/'` | Incoming request available to server functions via `getRequest()`. |
-| `router` | `AnyRouter` | -- | Router instance available via `getRouter()` inside server functions. |
-| `context` | `unknown` | `{}` | Initial middleware context merged into each call's context. |
-| `env` | `TestEnv` | `'server'` | Default simulated environment. |
-| `handlerType` | `StartHandlerType` | `'serverFn'` | Default handler type passed to the storage context. |
+| Property        | Type                        | Default                                  | Description                                                                                                         |
+| --------------- | --------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `startInstance` | `{ getOptions: () => ... }` | --                                       | A Start instance whose `getOptions()` is called once during creation. Ignored when `startOptions` is also provided. |
+| `startOptions`  | `AnyStartInstanceOptions`   | `{}`                                     | Explicit Start options. Takes precedence over `startInstance`.                                                      |
+| `request`       | `Request \| string \| URL`  | `'http://tanstack-router-testing.test/'` | Incoming request available to server functions via `getRequest()`.                                                  |
+| `router`        | `AnyRouter`                 | --                                       | Router instance available via `getRouter()` inside server functions.                                                |
+| `context`       | `unknown`                   | `{}`                                     | Initial middleware context merged into each call's context.                                                         |
+| `env`           | `TestEnv`                   | `'server'`                               | Default simulated environment.                                                                                      |
+| `handlerType`   | `StartHandlerType`          | `'serverFn'`                             | Default handler type passed to the storage context.                                                                 |
 
 ---
 
@@ -973,13 +967,13 @@ interface StartTestRuntime {
 
 A test runtime that simulates the TanStack Start server environment.
 
-| Member | Type | Description |
-|---|---|---|
-| `request` | `Request` | The `Request` object available to server functions. |
-| `startOptions` | `AnyStartInstanceOptions` | The resolved Start options used by the runtime. |
-| `run(fn, options?)` | `<T>(...) => Promise<T>` | Run an arbitrary function inside the Start storage context with optional per-invocation overrides. |
-| `call(fn, args, options?)` | `<TArgs, TReturn>(...) => Promise<Awaited<TReturn>>` | Invoke a function with explicit arguments inside the Start storage context. |
-| `cleanup()` | `() => void` | Remove all server-function and middleware mocks. Equivalent to `clearStartMocks()`. |
+| Member                     | Type                                                 | Description                                                                                        |
+| -------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `request`                  | `Request`                                            | The `Request` object available to server functions.                                                |
+| `startOptions`             | `AnyStartInstanceOptions`                            | The resolved Start options used by the runtime.                                                    |
+| `run(fn, options?)`        | `<T>(...) => Promise<T>`                             | Run an arbitrary function inside the Start storage context with optional per-invocation overrides. |
+| `call(fn, args, options?)` | `<TArgs, TReturn>(...) => Promise<Awaited<TReturn>>` | Invoke a function with explicit arguments inside the Start storage context.                        |
+| `cleanup()`                | `() => void`                                         | Remove all server-function and middleware mocks. Equivalent to `clearStartMocks()`.                |
 
 ---
 
@@ -993,8 +987,8 @@ interface RscTestRuntimeOptions extends StartTestRuntimeOptions {
 
 Configuration for `createRscTestRuntime`. Extends `StartTestRuntimeOptions`.
 
-| Property | Type | Default | Description |
-|---|---|---|---|
+| Property    | Type      | Default | Description                                                                                                 |
+| ----------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------- |
 | `streaming` | `boolean` | `false` | When `true`, renders via `renderToReadableStream` and collects chunks. When `false`, uses `renderToString`. |
 
 ---
@@ -1011,11 +1005,11 @@ interface RscRenderResult {
 
 The result of rendering a React Server Component.
 
-| Property | Type | Description |
-|---|---|---|
-| `html` | `string` | The complete HTML string produced by the render. |
-| `stream` | `ReadableStream<Uint8Array> \| null` | Cloned readable stream. Only present when `streaming: true`; otherwise `null`. |
-| `chunks` | `readonly string[]` | Decoded text chunks collected from the stream. Empty when `streaming` is `false`. |
+| Property | Type                                 | Description                                                                       |
+| -------- | ------------------------------------ | --------------------------------------------------------------------------------- |
+| `html`   | `string`                             | The complete HTML string produced by the render.                                  |
+| `stream` | `ReadableStream<Uint8Array> \| null` | Cloned readable stream. Only present when `streaming: true`; otherwise `null`.    |
+| `chunks` | `readonly string[]`                  | Decoded text chunks collected from the stream. Empty when `streaming` is `false`. |
 
 ---
 
@@ -1023,17 +1017,14 @@ The result of rendering a React Server Component.
 
 ```ts
 interface RscTestRuntime extends StartTestRuntime {
-  readonly renderServerComponent: <TProps extends Record<string, unknown>>(
-    component: ComponentType<TProps>,
-    props: TProps,
-  ) => Promise<RscRenderResult>;
+  readonly renderServerComponent: <TProps extends Record<string, unknown>>(component: ComponentType<TProps>, props: TProps) => Promise<RscRenderResult>;
 }
 ```
 
 Extended test runtime that adds React Server Component rendering on top of `StartTestRuntime`.
 
-| Member | Type | Description |
-|---|---|---|
+| Member                                    | Type                                        | Description                                                |
+| ----------------------------------------- | ------------------------------------------- | ---------------------------------------------------------- |
 | `renderServerComponent(component, props)` | `<TProps>(...) => Promise<RscRenderResult>` | Render a React component to HTML using `react-dom/server`. |
 
 All members from `StartTestRuntime` are also available.
@@ -1045,20 +1036,17 @@ All members from `StartTestRuntime` are also available.
 #### `mockServerFn(fn, impl)`
 
 ```ts
-function mockServerFn<TFn extends AnyServerFn>(
-  fn: TFn,
-  impl: ServerFnMock<TFn>,
-): () => void;
+function mockServerFn<TFn extends AnyServerFn>(fn: TFn, impl: ServerFnMock<TFn>): () => void;
 ```
 
 Install a mock implementation for a TanStack Start server function. The mock is authored against the public callable shape, so a server function normally called as `listOrders({ data })` is mocked with that same signature. Internal context fields are normalized automatically.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `fn` | `TFn` | The server function created by `createServerFn().handler(...)`. |
-| `impl` | `ServerFnMock<TFn>` | Replacement handler. Receives the same callable-shape arguments as the original. |
+| Parameter | Type                | Description                                                                      |
+| --------- | ------------------- | -------------------------------------------------------------------------------- |
+| `fn`      | `TFn`               | The server function created by `createServerFn().handler(...)`.                  |
+| `impl`    | `ServerFnMock<TFn>` | Replacement handler. Receives the same callable-shape arguments as the original. |
 
 **Returns:** `() => void` -- a disposer that restores the original implementation.
 
@@ -1072,9 +1060,7 @@ const listOrders = createServerFn()
   .validator((input: { userId: string }) => input)
   .handler(async ({ data }) => db.orders.findMany(data.userId));
 
-const dispose = mockServerFn(listOrders, async ({ data }) => [
-  { id: '1', userId: data.userId, total: 42 },
-]);
+const dispose = mockServerFn(listOrders, async ({ data }) => [{ id: '1', userId: data.userId, total: 42 }]);
 
 // ... run your test ...
 dispose();
@@ -1092,10 +1078,10 @@ Override one or both phases of a registered middleware.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `mw` | `object` | The middleware object returned by `createMiddleware().server(...).client(...)`. |
-| `options` | `MockMiddlewareOptions` | Which phases to replace. |
+| Parameter | Type                    | Description                                                                     |
+| --------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `mw`      | `object`                | The middleware object returned by `createMiddleware().server(...).client(...)`. |
+| `options` | `MockMiddlewareOptions` | Which phases to replace.                                                        |
 
 **Returns:** `() => void` -- a disposer that restores the original handlers.
 
@@ -1152,10 +1138,10 @@ Execute `fn` with the simulated TanStack Start environment forced to `env`, then
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `env` | `TestEnv` | `'server'` or `'client'`. |
-| `fn` | `() => T \| Promise<T>` | Synchronous or asynchronous function to run. |
+| Parameter | Type                    | Description                                  |
+| --------- | ----------------------- | -------------------------------------------- |
+| `env`     | `TestEnv`               | `'server'` or `'client'`.                    |
+| `fn`      | `() => T \| Promise<T>` | Synchronous or asynchronous function to run. |
 
 **Returns:** `Promise<T>`
 
@@ -1180,17 +1166,15 @@ Re-exported from `@tanstack-router-testing/router-testing-core`. See [`callMiddl
 #### `createStartTestRuntime(options?)`
 
 ```ts
-function createStartTestRuntime(
-  options?: StartTestRuntimeOptions,
-): Promise<StartTestRuntime>;
+function createStartTestRuntime(options?: StartTestRuntimeOptions): Promise<StartTestRuntime>;
 ```
 
 Create a `StartTestRuntime` for executing server functions in a simulated TanStack Start environment. Resolves Start options from either `startOptions` or `startInstance.getOptions()`, sets up the Start storage context, and executes global request middlewares before each invocation.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                      | Description                                                           |
+| --------- | ------------------------- | --------------------------------------------------------------------- |
 | `options` | `StartTestRuntimeOptions` | Runtime configuration. Optional; defaults to an empty options object. |
 
 **Returns:** `Promise<StartTestRuntime>` -- async because Start options may need to be resolved.
@@ -1199,10 +1183,7 @@ Create a `StartTestRuntime` for executing server functions in a simulated TanSta
 
 ```ts
 import { createServerFn } from '@tanstack/react-start';
-import {
-  createStartTestRuntime,
-  mockServerFn,
-} from '@tanstack-router-testing/react-start-testing';
+import { createStartTestRuntime, mockServerFn } from '@tanstack-router-testing/react-start-testing';
 
 const runtime = await createStartTestRuntime({
   request: 'http://localhost:3000/api/orders',
@@ -1213,9 +1194,7 @@ const listOrders = createServerFn()
   .validator((input: { userId: string }) => input)
   .handler(async ({ data }) => [{ id: '1', userId: data.userId }]);
 
-mockServerFn(listOrders, async ({ data }) => [
-  { id: 'mock-1', userId: data.userId },
-]);
+mockServerFn(listOrders, async ({ data }) => [{ id: 'mock-1', userId: data.userId }]);
 
 const orders = await runtime.call(listOrders, [{ data: { userId: 'u1' } }]);
 // orders === [{ id: 'mock-1', userId: 'u1' }]
@@ -1228,17 +1207,15 @@ runtime.cleanup();
 #### `createRscTestRuntime(options?)`
 
 ```ts
-function createRscTestRuntime(
-  options?: RscTestRuntimeOptions,
-): Promise<RscTestRuntime>;
+function createRscTestRuntime(options?: RscTestRuntimeOptions): Promise<RscTestRuntime>;
 ```
 
 Create an `RscTestRuntime` for rendering React Server Components in a simulated TanStack Start environment. Delegates to `createStartTestRuntime` for the base runtime, then adds `renderServerComponent` which uses `react-dom/server`.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                    | Description                                                    |
+| --------- | ----------------------- | -------------------------------------------------------------- |
 | `options` | `RscTestRuntimeOptions` | Runtime configuration including the optional `streaming` flag. |
 
 **Returns:** `Promise<RscTestRuntime>`
@@ -1279,29 +1256,27 @@ interface TanstackStartTestingOptions {
 }
 ```
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `routesDirectory` | `string` | `'src/routes'` | Directory holding file-based routes, relative to the Vite root. |
-| `generatedRouteTree` | `string` | `'src/routeTree.gen.ts'` | Output path for the generated route tree. |
-| `aliasReactStart` | `boolean` | `true` | Whether to alias `@tanstack/react-start` to the test runtime shim. |
-| `rsc` | `boolean` | `false` | Install a small test runtime module for TanStack Start RSC imports that need `virtual:tanstack-rsc-runtime` under Vitest. |
+| Property             | Type      | Default                  | Description                                                                                                               |
+| -------------------- | --------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `routesDirectory`    | `string`  | `'src/routes'`           | Directory holding file-based routes, relative to the Vite root.                                                           |
+| `generatedRouteTree` | `string`  | `'src/routeTree.gen.ts'` | Output path for the generated route tree.                                                                                 |
+| `aliasReactStart`    | `boolean` | `true`                   | Whether to alias `@tanstack/react-start` to the test runtime shim.                                                        |
+| `rsc`                | `boolean` | `false`                  | Install a small test runtime module for TanStack Start RSC imports that need `virtual:tanstack-rsc-runtime` under Vitest. |
 
 ---
 
 #### `tanstackStartTesting(options?)`
 
 ```ts
-function tanstackStartTesting(
-  options?: TanstackStartTestingOptions,
-): readonly Plugin[];
+function tanstackStartTesting(options?: TanstackStartTestingOptions): readonly Plugin[];
 ```
 
 Vite/Vitest plugins for TanStack Start tests. Keeps route-tree generation on the real TanStack Router plugin path while swapping the Start runtime to the in-process testing shim. Also injects `generatedRouteTree` as a Vitest `setupFiles` entry so all file-based routes have their parent/path/id wired up before any test runs.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter | Type                          | Description                     |
+| --------- | ----------------------------- | ------------------------------- |
 | `options` | `TanstackStartTestingOptions` | Plugin configuration. Optional. |
 
 **Returns:** `readonly Plugin[]` -- an array of Vite plugins.
@@ -1338,8 +1313,7 @@ Storybook integration for TanStack Start stories.
 
 ```ts
 // Per-pair generic binding: each tuple is typed against its own server fn.
-type ServerFnMockPair<TFn extends AnyServerFn = AnyServerFn> =
-  readonly [TFn, ServerFnMock<TFn>];
+type ServerFnMockPair<TFn extends AnyServerFn = AnyServerFn> = readonly [TFn, ServerFnMock<TFn>];
 
 interface TanStackStartStoryParameters<TRouteTree extends AnyRoute = AnyRoute> {
   readonly routeTree: TRouteTree;
@@ -1351,12 +1325,12 @@ interface TanStackStartStoryParameters<TRouteTree extends AnyRoute = AnyRoute> {
 
 Story parameters consumed by `withTanStackStart`. Place under `parameters.tanstackStart` on a CSF3 story.
 
-| Property | Type | Description |
-|---|---|---|
-| `routeTree` | `TRouteTree` | The route tree for the story's router. |
-| `initialEntries` | `readonly string[]` | Initial navigation entries; last one is active. |
-| `context` | `Record<string, unknown>` | Router context bag as declared by the root route. |
-| `serverFnMocks` | `readonly ServerFnMockPair[]` | Array of `[serverFn, mockImplementation]` tuples. Each pair binds `TFn` independently, preserving type inference per server function. Installed via `mockServerFn` before the story renders and torn down afterwards. |
+| Property         | Type                          | Description                                                                                                                                                                                                           |
+| ---------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routeTree`      | `TRouteTree`                  | The route tree for the story's router.                                                                                                                                                                                |
+| `initialEntries` | `readonly string[]`           | Initial navigation entries; last one is active.                                                                                                                                                                       |
+| `context`        | `Record<string, unknown>`     | Router context bag as declared by the root route.                                                                                                                                                                     |
+| `serverFnMocks`  | `readonly ServerFnMockPair[]` | Array of `[serverFn, mockImplementation]` tuples. Each pair binds `TFn` independently, preserving type inference per server function. Installed via `mockServerFn` before the story renders and torn down afterwards. |
 
 ---
 

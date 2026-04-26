@@ -1,10 +1,11 @@
+import type { RscTestRuntime } from '../../src/index.ts';
+
 import React, { Suspense } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createRscTestRuntime } from '../../src/index.ts';
-import type { RscTestRuntime } from '../../src/index.ts';
 
-describe('RSC test runtime', () => {
+describe('rSC test runtime', () => {
   let runtime: RscTestRuntime;
 
   afterEach(() => {
@@ -46,7 +47,7 @@ describe('RSC test runtime', () => {
     const AsyncChild = () => <div>async content</div>;
 
     const Wrapper = () => (
-      <Suspense fallback={<div>loading...</div>}>
+      <Suspense fallback='loading...'>
         <AsyncChild />
       </Suspense>
     );
@@ -59,7 +60,7 @@ describe('RSC test runtime', () => {
   it('renders with Suspense boundary in string mode', async () => {
     const Child = () => <div>child content</div>;
     const Wrapper = () => (
-      <Suspense fallback={<div>loading fallback</div>}>
+      <Suspense fallback='loading fallback'>
         <Child />
       </Suspense>
     );
