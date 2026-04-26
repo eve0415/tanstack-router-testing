@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Internal runtime primitives for TanStack Router/Start test harnesses.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/eve0415/tanstack-router-testing.git",

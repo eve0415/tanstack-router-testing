@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-router: createTestRouter and createRouterHarness.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/eve0415/tanstack-router-testing.git",

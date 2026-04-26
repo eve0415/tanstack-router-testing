@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-start: direct server function tests, mocks, env control, and Vitest wiring.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/eve0415/tanstack-router-testing.git",

@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Storybook decorator for TanStack Start: wire CSF3 story parameters through createTestRouter + mockServerFn.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/eve0415/tanstack-router-testing.git",
