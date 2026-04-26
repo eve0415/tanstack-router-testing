@@ -151,3 +151,71 @@ describe('createRouterHarness', () => {
     expect(matches.some((m) => m.routeId === '/posts/$postId')).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// File-route harness (testing a single route in isolation)
+// ---------------------------------------------------------------------------
+
+describe('createRouterHarness with route option', () => {
+  it('loads a single route with typed params', async () => {
+    const harness = createRouterHarness({
+      route: postRoute,
+      params: { postId: '42' },
+    });
+    await harness.load();
+
+    expect(harness.getLoaderData(postRoute)).toEqual({
+      id: 42,
+      title: 'Post #42',
+    });
+    harness.cleanup();
+  });
+
+  it('overrides loader data', async () => {
+    const harness = createRouterHarness({
+      route: postRoute,
+      params: { postId: '1' },
+      loaderData: { id: 99, title: 'Stubbed' },
+    });
+    await harness.load();
+
+    expect(harness.getLoaderData(postRoute)).toEqual({
+      id: 99,
+      title: 'Stubbed',
+    });
+    harness.cleanup();
+  });
+
+  it('renders the route component with Route.useLoaderData()', async () => {
+    const { TestRouterProvider } = createRouterHarness({
+      route: postRoute,
+      params: { postId: '5' },
+    });
+    render(<TestRouterProvider />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Post #5')).toBeDefined();
+    });
+  });
+
+  it('renders children that use route hooks', async () => {
+    const PostId = () => {
+      const { id } = postRoute.useLoaderData();
+      return <span data-testid="id">{id}</span>;
+    };
+
+    const { TestRouterProvider } = createRouterHarness({
+      route: postRoute,
+      params: { postId: '7' },
+    });
+    render(
+      <TestRouterProvider>
+        <PostId />
+      </TestRouterProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('id').textContent).toBe('7');
+    });
+  });
+});

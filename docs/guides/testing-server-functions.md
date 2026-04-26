@@ -111,6 +111,30 @@ describe('OrderList component', () => {
 });
 ```
 
+## File-Based Route with Server Function Mocks
+
+Combine file-route testing with server function mocks:
+
+```ts
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { mockServerFn, clearStartMocks } from '@tanstack-router-testing/react-start-testing';
+import { Route as OrdersRoute } from './routes/orders';
+import { listOrders } from './server/orders';
+
+afterEach(() => clearStartMocks());
+
+it('renders orders with mocked server function', async () => {
+  mockServerFn(listOrders, async () => [{ id: '1', total: 42 }]);
+
+  const harness = createRouterHarness({ route: OrdersRoute });
+  await harness.load();
+
+  render(<harness.TestRouterProvider />);
+  // Assert on rendered orders
+  harness.cleanup();
+});
+```
+
 ## Mocking Server Functions That Throw
 
 Test error paths by having the mock throw.

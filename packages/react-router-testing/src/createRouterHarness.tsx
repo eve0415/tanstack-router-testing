@@ -394,39 +394,40 @@ export interface RouterHarness<TRouter extends AnyRouter> {
  * optional `QueryClientProvider`), giving tests a single entry point for
  * rendering, navigating, and asserting against route state.
  *
- * @typeParam TRouteTree - The application's route tree type (typically from
- *   `routeTree.gen.ts`).
- * @typeParam TTrailingSlash - Trailing-slash behavior.
- * @typeParam TDefaultStructural - Whether structural sharing is the default.
- * @typeParam TDehydrated - Dehydrated state shape for SSR.
+ * Two overloads: pass `route` to test a single file-based route in
+ * isolation, or pass `routeTree` for full route-tree integration tests.
  *
- * @param options - All options from {@link CreateTestRouterOptions} plus an
- *   optional `queryClient` for `@tanstack/react-query` integration.
- * @param options.queryClient - An optional `QueryClient` instance. When
- *   provided, the harness wraps the router provider with
- *   `QueryClientProvider` from `@tanstack/react-query`. The package is
- *   lazily imported on the first {@link RouterHarness.load | load()} call
- *   and throws with an install hint if missing.
+ * @param options - Either {@link FileRouteHarnessOptions} (with `route`) or
+ *   {@link CreateTestRouterOptions} (with `routeTree`) plus an optional
+ *   `queryClient`.
  * @returns A {@link RouterHarness} with the router instance, provider
  *   component, and convenience accessors for route state.
  *
  * @example
  * ```tsx
- * import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
- * import { render } from '@testing-library/react';
+ * // File-route testing (preferred for file-based routing)
+ * import { Route } from './routes/posts.$postId';
+ *
+ * const harness = createRouterHarness({
+ *   route: Route,
+ *   params: { postId: '7' },
+ * });
+ * await harness.load();
+ * expect(harness.getLoaderData(Route)).toBeDefined();
+ * harness.cleanup();
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Full route tree testing
  * import { routeTree } from './routeTree.gen';
  *
  * const harness = createRouterHarness({
  *   routeTree,
  *   initialEntries: ['/posts/7'],
- *   context: { auth: stubAuth },
  * });
  * await harness.load();
- *
- * const { getByText } = render(<harness.TestRouterProvider />);
- * expect(getByText('Post #7')).toBeDefined();
- * expect(harness.getLoaderData('/posts/$postId')).toEqual({ id: 7 });
- *
+ * expect(harness.getLoaderData('/posts/$postId')).toBeDefined();
  * harness.cleanup();
  * ```
  *

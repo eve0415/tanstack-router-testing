@@ -146,6 +146,37 @@ describe('auth guard with context', () => {
 });
 ```
 
+## File-Based Route Testing with Guards
+
+When testing file-based routes with auth guards, ancestor `beforeLoad` functions run normally (preserved for context cascading). Only ancestor loaders are neutered.
+
+```ts
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { Route as AdminRoute } from './routes/admin';
+
+it('redirects unauthenticated users', async () => {
+  const harness = createRouterHarness({
+    route: AdminRoute,
+    context: { auth: null },
+  });
+  const result = await harness.getRedirect({ to: '/admin' });
+  expect(result?.pathname).toBe('/login');
+  harness.cleanup();
+});
+
+it('allows access when authenticated', async () => {
+  const harness = createRouterHarness({
+    route: AdminRoute,
+    context: { auth: { user: 'alice' } },
+  });
+  await harness.load();
+  expect(harness.getRouteContext(AdminRoute)).toMatchObject({
+    auth: { user: 'alice' },
+  });
+  harness.cleanup();
+});
+```
+
 ## Inspecting Route Context After Guards
 
 `beforeLoad` can enrich the context for downstream routes. Use `getRouteContext()` to verify.

@@ -128,6 +128,59 @@ it('uses validated search params', async () => {
 });
 ```
 
+## File-Based Route Testing
+
+When using file-based routing, import the route directly and pass it to the harness. Ancestor loaders are automatically neutered for isolation.
+
+```ts
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { Route } from './routes/posts.$postId';
+
+it('loads a file-based route with typed params', async () => {
+  const harness = createRouterHarness({
+    route: Route,
+    params: { postId: '42' },  // fully typed
+  });
+  await harness.load();
+
+  expect(harness.getLoaderData(Route)).toBeDefined();
+  harness.cleanup();
+});
+```
+
+Override loader data to skip the real loader (useful when loaders make HTTP calls):
+
+```ts
+it('uses stubbed loader data', async () => {
+  const harness = createRouterHarness({
+    route: Route,
+    params: { postId: '42' },
+    loaderData: { id: '42', title: 'Stubbed' },
+  });
+  await harness.load();
+
+  expect(harness.getLoaderData(Route)).toEqual({ id: '42', title: 'Stubbed' });
+  harness.cleanup();
+});
+```
+
+Search params work the same way:
+
+```ts
+import { Route as SearchRoute } from './routes/search';
+
+it('passes typed search params', async () => {
+  const harness = createRouterHarness({
+    route: SearchRoute,
+    search: { page: 3 },  // typed from validateSearch
+  });
+  await harness.load();
+
+  expect(harness.getSearch(SearchRoute)).toEqual({ page: 3 });
+  harness.cleanup();
+});
+```
+
 ## Common Pitfalls
 
 - **Forgetting `await harness.load()`** -- `getLoaderData()` returns `undefined` until the router finishes loading. Always await `load()` before asserting.

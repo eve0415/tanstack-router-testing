@@ -84,6 +84,64 @@ describe('router harness', () => {
 });
 ```
 
+## Testing File-Based Routes
+
+If your app uses file-based routing, you can test a single route file directly — no need to build a route tree by hand. Import the route, pass it to `createRouterHarness`, and get fully typed `params` and `search`.
+
+```tsx
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { Route } from './routes/posts.$postId';
+
+describe('post route', () => {
+  it('loads and renders a post', async () => {
+    const harness = createRouterHarness({
+      route: Route,
+      params: { postId: '42' },  // typed from the route's path
+    });
+    await harness.load();
+
+    expect(harness.getLoaderData(Route)).toBeDefined();
+
+    const { findByText } = render(<harness.TestRouterProvider />);
+    await expect(findByText('Post 42')).resolves.toBeTruthy();
+    harness.cleanup();
+  });
+});
+```
+
+The harness automatically:
+- Walks from the route to its root to get the full route tree
+- Neuters ancestor loaders for isolation (ancestor `beforeLoad` still runs for context cascading)
+- Computes the initial URL from `params` and `search`
+
+You can also override loader data to skip the real loader entirely:
+
+```tsx
+const harness = createRouterHarness({
+  route: Route,
+  params: { postId: '42' },
+  loaderData: { id: '42', title: 'Stubbed Post' },
+});
+```
+
+Or test independent components that call `Route.useLoaderData()`:
+
+```tsx
+const { TestRouterProvider } = createRouterHarness({
+  route: Route,
+  params: { postId: '42' },
+});
+render(
+  <TestRouterProvider>
+    <MyComponent />  {/* calls Route.useLoaderData() internally */}
+  </TestRouterProvider>,
+);
+```
+
+> **Note:** The Vite plugin (`tanstackStartTesting()`) auto-injects `routeTree.gen.ts` as a Vitest setup file, so all routes have their parent/path/id wired up before any test runs. If you're not using the plugin, import `routeTree.gen.ts` at the top of your test file for side effects.
+
 ## Common Patterns
 
 Clean up the harness in `afterEach` so history listeners don't leak between tests:

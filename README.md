@@ -21,39 +21,47 @@ export default defineConfig({
 });
 ```
 
-Write your first test:
+Write your first test — import a single route file, pass it to the harness, and assert:
 
 ```tsx
-import { createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
+// posts.$postId.test.tsx
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { Route } from './routes/posts.$postId';
 
-const rootRoute = createRootRoute({ component: () => <Outlet /> });
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/',
-  loader: () => ({ message: 'hello' }),
-  component: () => <h1>{indexRoute.useLoaderData().message}</h1>,
-});
-const routeTree = rootRoute.addChildren([indexRoute]);
-
-describe('my app', () => {
-  it('renders the index page', async () => {
-    const harness = createRouterHarness({ routeTree });
+describe('post route', () => {
+  it('loads and renders a post', async () => {
+    const harness = createRouterHarness({
+      route: Route,
+      params: { postId: '42' },    // fully typed from route path
+      loaderData: { id: '42', title: 'Hello' },  // skip the real loader
+    });
     await harness.load();
     const { findByText } = render(<harness.TestRouterProvider />);
-    await expect(findByText('hello')).resolves.toBeTruthy();
+    await expect(findByText('Hello')).resolves.toBeTruthy();
     harness.cleanup();
   });
 });
+```
+
+Or use a full route tree for integration-level tests:
+
+```tsx
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { routeTree } from './routeTree.gen';
+
+const harness = createRouterHarness({ routeTree, initialEntries: ['/posts/7'] });
+await harness.load();
+expect(harness.getLoaderData('/posts/$postId')).toBeDefined();
+harness.cleanup();
 ```
 
 ## Packages
 
 | Package | Purpose |
 | --- | --- |
-| [`react-router-testing`](./packages/react-router-testing) | `createTestRouter`, `createRouterHarness`, SSR harness |
+| [`react-router-testing`](./packages/react-router-testing) | `createRouterHarness` (file route or full tree), `createTestRouter`, SSR harness |
 | [`react-start-testing`](./packages/react-start-testing) | `mockServerFn`, `mockMiddleware`, `createStartTestRuntime`, RSC runtime, Vite plugin |
 | [`router-testing-core`](./packages/router-testing-core) | Internal registry/env runtime (transitive dependency) |
 | [`react-start-testing-storybook`](./packages/react-start-testing-storybook) | Storybook decorator for Start stories |

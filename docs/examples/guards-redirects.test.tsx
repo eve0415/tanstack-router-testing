@@ -190,3 +190,46 @@ describe('getMatch — low-level match inspection', () => {
     harness.cleanup();
   });
 });
+
+// ---------------------------------------------------------------------------
+// File-route harness — guards and redirects
+// ---------------------------------------------------------------------------
+
+describe('file-route harness: guards', () => {
+  it('redirects when guard throws redirect', async () => {
+    isAuthenticated = false;
+    const harness = createRouterHarness({
+      route: dashboardRoute,
+    });
+    const result = await harness.getRedirect({ to: '/dashboard' });
+    expect(result?.pathname).toBe('/login');
+    harness.cleanup();
+  });
+
+  it('passes through when guard succeeds', async () => {
+    isAuthenticated = true;
+    const harness = createRouterHarness({
+      route: dashboardRoute,
+    });
+    await harness.load();
+    expect(harness.getMatch(dashboardRoute)).toBeDefined();
+    harness.cleanup();
+  });
+
+  it('captures errors on file-route matches', async () => {
+    const harness = createRouterHarness({ route: failRoute });
+    await harness.load();
+    expect(harness.getError(failRoute)).toBeInstanceOf(Error);
+    harness.cleanup();
+  });
+
+  it('reads context from beforeLoad', async () => {
+    const harness = createRouterHarness({ route: contextRoute });
+    await harness.load();
+    const context = harness.getRouteContext(contextRoute) as {
+      featureFlags: { beta: boolean };
+    };
+    expect(context).toHaveProperty('featureFlags.beta', true);
+    harness.cleanup();
+  });
+});

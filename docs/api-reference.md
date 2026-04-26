@@ -473,19 +473,44 @@ A discriminated union: pass either a `history` object (production-shaped) or `in
 
 ---
 
+#### `FileRouteHarnessOptions<TRoute>`
+
+```ts
+interface FileRouteHarnessOptions<TRoute extends AnyRoute = AnyRoute> {
+  readonly route: TRoute;
+  readonly params?: TRoute['types']['allParams'];
+  readonly search?: TRoute['types']['fullSearchSchema'];
+  readonly loaderData?: TRoute['types']['loaderData'];
+  readonly context?: Record<string, unknown>;
+  readonly queryClient?: object;
+}
+```
+
+Options for `createRouterHarness` when testing a single file-based route. All type parameters are inferred from the route, giving full autocomplete on `params`, `search`, and `loaderData`.
+
+| Property | Type | Description |
+|---|---|---|
+| `route` | `TRoute` | The file-based route to test. The harness walks to the root automatically. |
+| `params` | `TRoute['types']['allParams']` | Path params, fully typed from the route's path definition. |
+| `search` | `TRoute['types']['fullSearchSchema']` | Search params, fully typed from the route's `validateSearch`. |
+| `loaderData` | `TRoute['types']['loaderData']` | Override loader data instead of running the real loader. |
+| `context` | `Record<string, unknown>` | Router context passed to `beforeLoad` and `loader` functions. |
+| `queryClient` | `object` | Optional `QueryClient` for `@tanstack/react-query` integration. |
+
+---
+
 #### `RouteMatchTarget`
 
 ```ts
 type RouteMatchTarget =
   | string
+  | AnyRoute
   | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
 ```
 
-Identifies a route match inside the current router state. Pass a plain string to match against any of `id`, `routeId`, or `fullPath`. Pass an object to match a specific field.
+Identifies a route match inside the current router state. Pass a plain string to match against any of `id`, `routeId`, or `fullPath`. Pass a route object to match by its `id`. Pass an object to match a specific field.
 
-When an object is given, fields are checked in precedence order: `id` > `routeId` > `fullPath`. A bare string is compared against all three, returning the first match.
-
-> **Note:** `RouteMatchTarget` is not directly re-exported from the package entry point. Users encounter it as the parameter type for `RouterHarness` accessor methods (`getMatch`, `getLoaderData`, `getRouteContext`, `getSearch`, `getParams`, `getError`).
+When an object is given, fields are checked in precedence order: `id` > `routeId` > `fullPath`. A bare string is compared against all three, returning the first match. A route object uses its internal `id`.
 
 ---
 
@@ -494,7 +519,7 @@ When an object is given, fields are checked in precedence order: `id` > `routeId
 ```ts
 interface RouterHarness<TRouter extends AnyRouter> {
   readonly router: TRouter;
-  readonly TestRouterProvider: ComponentType;
+  readonly TestRouterProvider: ComponentType<{ children?: ReactNode }>;
   readonly load: () => Promise<void>;
   readonly navigate: (options: Parameters<TRouter['navigate']>[0]) => Promise<void>;
   readonly preload: (options: Parameters<TRouter['preloadRoute']>[0]) => Promise<readonly AnyRouteMatch[] | undefined>;
@@ -517,7 +542,7 @@ Facade returned by `createRouterHarness` for testing routes, loaders, guards, re
 | Member | Type | Description |
 |---|---|---|
 | `router` | `TRouter` | The underlying router instance. Useful for low-level assertions on `router.state`. |
-| `TestRouterProvider` | `ComponentType` | A React component wrapping `RouterProvider` (and optionally `QueryClientProvider`). Pass to `render()`. |
+| `TestRouterProvider` | `ComponentType<{ children?: ReactNode }>` | A React component wrapping `RouterProvider` (and optionally `QueryClientProvider`). Pass to `render()`. When using the `route` option, pass children to test independent components that call route hooks like `Route.useLoaderData()`. |
 | `load()` | `() => Promise<void>` | Load the router, resolving all matched route loaders and `beforeLoad` guards. Must be called before state accessors. |
 | `navigate(options)` | `(...) => Promise<void>` | Navigate and wait for the transition to settle. Navigation errors reject the returned promise. |
 | `preload(options)` | `(...) => Promise<AnyRouteMatch[] \| undefined>` | Preload a route's chunks and loaders without navigating. |
@@ -661,6 +686,18 @@ const router = createTestRouter({
 
 #### `createRouterHarness(options)`
 
+Two overloads: one for testing a single file-based route, one for a full route tree.
+
+**Overload 1: File route** (preferred for file-based routing)
+
+```ts
+function createRouterHarness<TRoute extends AnyRoute>(
+  options: FileRouteHarnessOptions<TRoute>,
+): RouterHarness<AnyRouter>;
+```
+
+**Overload 2: Full route tree**
+
 ```ts
 function createRouterHarness<
   TRouteTree extends AnyRoute,
@@ -676,21 +713,53 @@ function createRouterHarness<
 
 Create a `RouterHarness` containing a fully wired test router and a React provider component. Combines `createTestRouter` with a `RouterProvider` wrapper (and an optional `QueryClientProvider`), giving tests a single entry point for rendering, navigating, and asserting against route state.
 
-**Parameters:**
+When `route` is provided, the harness automatically walks to the root, neuters ancestor loaders for isolation (preserving `beforeLoad` for context cascading), and computes the initial URL from `params`/`search`.
+
+**Parameters (file route overload):**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `route` | `AnyRoute` | The file-based route to test. |
+| `params` | Typed from route | Path params. Fully typed from the route's path definition. |
+| `search` | Typed from route | Search params. Fully typed from `validateSearch`. |
+| `loaderData` | Typed from route | Override loader data. Skips the real loader. |
+| `context` | `Record<string, unknown>` | Router context for `beforeLoad`/`loader`. |
+| `queryClient` | `object` | Optional `QueryClient` instance. |
+
+**Parameters (route tree overload):**
 
 All options from `CreateTestRouterOptions` plus:
 
 | Parameter | Type | Description |
 |---|---|---|
-| `queryClient` | `object` | Optional `QueryClient` instance. When provided, wraps `RouterProvider` with `QueryClientProvider` from `@tanstack/react-query`. The package is lazily imported on the first `load()` call and throws with an install hint if missing. |
+| `queryClient` | `object` | Optional `QueryClient` instance. When provided, wraps `RouterProvider` with `QueryClientProvider` from `@tanstack/react-query`. |
 
-**Returns:** `RouterHarness<Router<...>>`
+**Returns:** `RouterHarness<...>`
 
-**Example:**
+**Example (file route):**
 
 ```tsx
 import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 import { render } from '@testing-library/react';
+import { Route } from './routes/posts.$postId';
+
+const harness = createRouterHarness({
+  route: Route,
+  params: { postId: '7' },  // fully typed
+});
+await harness.load();
+
+expect(harness.getLoaderData(Route)).toBeDefined();
+const { getByText } = render(<harness.TestRouterProvider />);
+expect(getByText('Post #7')).toBeDefined();
+
+harness.cleanup();
+```
+
+**Example (full route tree):**
+
+```tsx
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
 import { routeTree } from './routeTree.gen';
 
 const harness = createRouterHarness({
@@ -700,12 +769,63 @@ const harness = createRouterHarness({
 });
 await harness.load();
 
-const { getByText } = render(<harness.TestRouterProvider />);
-expect(getByText('Post #7')).toBeDefined();
 expect(harness.getLoaderData('/posts/$postId')).toEqual({ id: 7 });
-
 harness.cleanup();
 ```
+
+---
+
+#### `walkToRoot(route)`
+
+```ts
+function walkToRoot(route: AnyRoute): AnyRoute;
+```
+
+Walk from a route to its root ancestor via `getParentRoute`. Used internally by `createRouterHarness` when the `route` option is provided.
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `route` | `AnyRoute` | Any route in the tree (leaf or intermediate). |
+
+**Returns:** `AnyRoute` -- the root route at the top of the parent chain.
+
+---
+
+#### `computeFullPath(route)`
+
+```ts
+function computeFullPath(route: AnyRoute): string;
+```
+
+Compute the full URL path for a route by walking up the parent chain.
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `route` | `AnyRoute` | The route whose full path to compute. |
+
+**Returns:** `string` -- e.g. `'/posts/$postId'`.
+
+---
+
+#### `neuterAncestorLoaders(targetRoute)`
+
+```ts
+function neuterAncestorLoaders(targetRoute: AnyRoute): () => void;
+```
+
+Replace all ancestor loaders with `undefined` for test isolation. Ancestor `beforeLoad` functions are preserved so context cascading (auth, permissions, etc.) continues to work.
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `targetRoute` | `AnyRoute` | The route under test. Its own loader is kept intact. |
+
+**Returns:** `() => void` -- a cleanup function that restores original loaders.
 
 ---
 
@@ -1176,7 +1296,7 @@ function tanstackStartTesting(
 ): readonly Plugin[];
 ```
 
-Vite/Vitest plugins for TanStack Start tests. Keeps route-tree generation on the real TanStack Router plugin path while swapping the Start runtime to the in-process testing shim.
+Vite/Vitest plugins for TanStack Start tests. Keeps route-tree generation on the real TanStack Router plugin path while swapping the Start runtime to the in-process testing shim. Also injects `generatedRouteTree` as a Vitest `setupFiles` entry so all file-based routes have their parent/path/id wired up before any test runs.
 
 **Parameters:**
 

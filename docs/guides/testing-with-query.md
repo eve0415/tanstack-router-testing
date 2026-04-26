@@ -132,6 +132,27 @@ describe('PostList component', () => {
 });
 ```
 
+## File-Based Route Testing with QueryClient
+
+The `route` option works with `queryClient` the same way:
+
+```tsx
+import { QueryClient } from '@tanstack/react-query';
+import { createRouterHarness } from '@tanstack-router-testing/react-router-testing';
+import { Route as PostsRoute } from './routes/posts';
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, gcTime: 0 } },
+});
+
+const harness = createRouterHarness({
+  route: PostsRoute,
+  context: { queryClient },
+  queryClient,
+});
+await harness.load();
+```
+
 ## Isolated QueryClient Per Test
 
 Create a fresh `QueryClient` in `beforeEach` to prevent cache leakage between tests.
