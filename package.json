@@ -19,6 +19,7 @@
     "test:types": "pnpm -r run test:types",
     "lint": "oxlint --report-unused-disable-directives --fix --fix-suggestions --ignore-path .oxlintignore && oxfmt",
     "lint:check": "oxlint --report-unused-disable-directives --ignore-path .oxlintignore && oxfmt --check",
+    "test:unit:coverage": "pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests",
     "clean": "pnpm -r exec rm -rf dist node_modules .tsbuildinfo"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/node": "25.6.0",
     "@typescript/native-preview": "7.0.0-dev.20260424.2",
+    "@vitest/coverage-v8": "^4.1.5",
     "@workos/authkit-tanstack-react-start": "^0.7.0",
     "arktype": "^2.2.0",
     "convex": "^1.36.1",

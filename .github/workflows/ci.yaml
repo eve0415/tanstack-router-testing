@@ -55,3 +55,60 @@ jobs:
 
       - name: Type tests
         run: pnpm run test:types
+
+  coverage:
+    name: Coverage
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Generate coverage
+        run: |
+          pnpm run test:unit:coverage 2>&1 | tee coverage.txt
+          {
+            echo '## Coverage Report'
+            echo ''
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } > coverage.md
+          if [ "$(wc -c < coverage.md)" -gt 60000 ]; then
+            {
+              echo '## Coverage Report'
+              echo ''
+              echo '> Truncated to fit GitHub comment limits. See CI logs for full report.'
+              echo ''
+              echo '```'
+              head -2 coverage.txt
+              echo '  ...'
+              tail -2 coverage.txt
+              echo '```'
+            } > coverage.md
+          fi
+
+      - name: Post coverage comment
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: coverage
+          path: coverage.md
