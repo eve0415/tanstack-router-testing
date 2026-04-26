@@ -31,3 +31,4 @@ vendor/**/src/routeTree.gen.ts
 
 # Claude
 .claude/settings.local.json
+CLAUDE.local.md
