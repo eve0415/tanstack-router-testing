@@ -2,11 +2,12 @@ import type { CreateTestRouterOptions } from './createTestRouter.ts';
 import type { RouterHistory } from '@tanstack/history';
 import type { AnyRouter, Router } from '@tanstack/react-router';
 import type { AnyRoute, AnyRouteMatch, TrailingSlashOption } from '@tanstack/router-core';
-import type { ComponentType, ReactElement } from 'react';
+import type { ComponentType, ReactElement, ReactNode } from 'react';
 
 import { RouterProvider } from '@tanstack/react-router';
 
 import { createTestRouter } from './createTestRouter.ts';
+import { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
 
 let _QueryClientProvider: ComponentType<{ client: object; children: ReactElement }> | undefined;
 const resolveQueryClientProvider = async (): Promise<void> => {
@@ -42,7 +43,41 @@ const resolveQueryClientProvider = async (): Promise<void> => {
  * harness.getLoaderData({ routeId: '/posts/$postId' });
  * ```
  */
-export type RouteMatchTarget = string | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
+export type RouteMatchTarget =
+  | string
+  | AnyRoute
+  | { readonly id?: string; readonly routeId?: string; readonly fullPath?: string };
+
+/**
+ * Options for {@link createRouterHarness} when testing a single file-based route.
+ *
+ * @typeParam TRoute - The route type, used to infer `params`, `search`, and
+ *   `loaderData` types from the route's type parameters.
+ *
+ * @example
+ * ```tsx
+ * import { Route } from './routes/posts.$postId';
+ *
+ * const harness = createRouterHarness({
+ *   route: Route,
+ *   params: { postId: '42' },  // fully typed
+ * });
+ * ```
+ */
+export interface FileRouteHarnessOptions<TRoute extends AnyRoute = AnyRoute> {
+  /** The file-based route to test. The full route tree is walked automatically. */
+  readonly route: TRoute;
+  /** Path params, fully typed from the route's path definition. */
+  readonly params?: TRoute['types']['allParams'];
+  /** Search params, fully typed from the route's `validateSearch`. */
+  readonly search?: TRoute['types']['fullSearchSchema'];
+  /** Override loader data instead of running the real loader. */
+  readonly loaderData?: TRoute['types']['loaderData'];
+  /** Router context passed to `beforeLoad` and `loader` functions. */
+  readonly context?: Record<string, unknown>;
+  /** Optional `QueryClient` for `@tanstack/react-query` integration. */
+  readonly queryClient?: object;
+}
 
 /**
  * Facade returned by {@link createRouterHarness} for testing routes, loaders,
@@ -90,7 +125,7 @@ export interface RouterHarness<TRouter extends AnyRouter> {
    * const { getByText } = render(<TestRouterProvider />);
    * ```
    */
-  readonly TestRouterProvider: ComponentType;
+  readonly TestRouterProvider: ComponentType<{ children?: ReactNode }>;
 
   /**
    * Load the router, resolving all matched route loaders and `beforeLoad`
@@ -401,7 +436,8 @@ export interface RouterHarness<TRouter extends AnyRouter> {
  * React renderer. Always call {@link RouterHarness.cleanup | cleanup()} in
  * test teardown to avoid leaking history listeners.
  */
-export const createRouterHarness = <
+export function createRouterHarness<TRoute extends AnyRoute>(options: FileRouteHarnessOptions<TRoute>): RouterHarness<AnyRouter>;
+export function createRouterHarness<
   TRouteTree extends AnyRoute,
   TTrailingSlash extends TrailingSlashOption = 'never',
   TDefaultStructural extends boolean = false,
@@ -410,11 +446,68 @@ export const createRouterHarness = <
   options: CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated> & {
     readonly queryClient?: object;
   },
-): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>> => {
-  const { queryClient, ...routerOptions } = options;
-  const router = createTestRouter(routerOptions as CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated>);
+): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createRouterHarness(options: any): RouterHarness<any> {
+  if (isFileRouteOptions(options)) {
+    return createFileRouteHarness(options as FileRouteHarnessOptions);
+  }
+  return createTreeRouteHarness(options as Record<string, unknown>);
+}
 
-  const TestRouterProvider = (): ReactElement => {
+const createTreeRouteHarness = (options: Record<string, unknown>): RouterHarness<AnyRouter> => {
+  const { queryClient, ...routerOptions } = options;
+  const router = createTestRouter(routerOptions as CreateTestRouterOptions<AnyRoute>);
+  return buildHarness(router, queryClient as object | undefined);
+};
+
+const createFileRouteHarness = (options: FileRouteHarnessOptions): RouterHarness<AnyRouter> => {
+  const { route, params, search, loaderData, context, queryClient } = options;
+  const routeTree = walkToRoot(route);
+  const initialUrl = buildUrlFromRoute(route, params, search);
+  const restoreAncestors = neuterAncestorLoaders(route);
+
+  let restoreLoader: (() => void) | undefined;
+  if (loaderData !== undefined) {
+    const routeOpts = route.options as unknown as Record<string, unknown>;
+    const originalLoader = routeOpts.loader;
+    routeOpts.loader = () => loaderData;
+    restoreLoader = () => { routeOpts.loader = originalLoader; };
+  }
+
+  const router = createTestRouter({
+    routeTree,
+    initialEntries: [initialUrl],
+    ...(context !== undefined ? { context } : {}),
+  } as CreateTestRouterOptions<AnyRoute>);
+
+  const harness = buildHarness(router, queryClient, route);
+  const originalCleanup = harness.cleanup;
+  return {
+    ...harness,
+    cleanup: () => {
+      originalCleanup();
+      restoreAncestors();
+      restoreLoader?.();
+    },
+  };
+};
+
+const buildHarness = (router: AnyRouter, queryClient: object | undefined, targetRoute?: AnyRoute): RouterHarness<AnyRouter> => {
+  let restoreComponent: (() => void) | undefined;
+
+  const TestRouterProvider = ({ children }: { children?: ReactNode }): ReactElement => {
+    if (children !== undefined && children !== null && targetRoute !== undefined && restoreComponent === undefined) {
+      const rOpts = targetRoute.options as unknown as Record<string, unknown>;
+      const OriginalComponent = rOpts.component as ComponentType | undefined;
+      rOpts.component = () => (
+        <>
+          {OriginalComponent ? <OriginalComponent /> : null}
+          {children}
+        </>
+      );
+      restoreComponent = () => { rOpts.component = OriginalComponent; };
+    }
     const provider = <RouterProvider router={router} />;
     if (!queryClient || !_QueryClientProvider) return provider;
     const Provider = _QueryClientProvider;
@@ -457,11 +550,40 @@ export const createRouterHarness = <
     cleanup: () => {
       router.cancelMatches();
       router.history.destroy?.();
+      restoreComponent?.();
     },
   };
-};
+}
+
+const isRouteObject = (target: RouteMatchTarget): target is AnyRoute =>
+  typeof target === 'object' && 'isRoot' in target;
 
 const getRouteId = (target: RouteMatchTarget): string => {
   if (typeof target === 'string') return target;
+  if (isRouteObject(target)) return (target as AnyRoute & { id?: string }).id ?? '';
   return target.id ?? target.routeId ?? target.fullPath ?? '';
 };
+
+const buildUrlFromRoute = (
+  route: AnyRoute,
+  params?: Record<string, string>,
+  search?: Record<string, unknown>,
+): string => {
+  const fullPath = computeFullPath(route);
+  let url = fullPath.replaceAll(/\$([a-zA-Z_]\w*)/g, (_match, paramName: string) => {
+    const value = params?.[paramName];
+    if (value === undefined) throw new Error(`[tanstack-router-testing] Missing param "${paramName}" for route "${fullPath}"`);
+    return encodeURIComponent(value);
+  });
+  if (search && Object.keys(search).length > 0) {
+    const qs = new URLSearchParams();
+    for (const [key, value] of Object.entries(search)) {
+      qs.set(key, String(value));
+    }
+    url += `?${qs.toString()}`;
+  }
+  return url;
+};
+
+const isFileRouteOptions = (options: object): boolean =>
+  'route' in options && (options as Record<string, unknown>).route !== undefined && (options as Record<string, unknown>).route !== null;

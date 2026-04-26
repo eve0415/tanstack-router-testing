@@ -48,16 +48,23 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
     ...(options.rsc ? [tanstackStartRscTestingRuntime()] : []),
     {
       name: '@tanstack/react-start/testing',
-      config(): UserConfig | undefined {
-        if (options.aliasReactStart === false) return undefined;
+      config(): UserConfig & { test: { setupFiles: readonly string[] } } {
+        const genPath = options.generatedRouteTree ?? 'src/routeTree.gen.ts';
         return {
-          resolve: {
-            alias: [
-              {
-                find: /^@tanstack\/react-start$/,
-                replacement: '@tanstack-router-testing/react-start-testing/shim',
-              },
-            ],
+          ...(options.aliasReactStart !== false
+            ? {
+                resolve: {
+                  alias: [
+                    {
+                      find: /^@tanstack\/react-start$/,
+                      replacement: '@tanstack-router-testing/react-start-testing/shim',
+                    },
+                  ],
+                },
+              }
+            : {}),
+          test: {
+            setupFiles: [genPath],
           },
         };
       },
