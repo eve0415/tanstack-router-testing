@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Lint
+        run: pnpm run lint:check
+
+      - name: Test
+        run: pnpm run test:unit:core
+
+      - name: Type check
+        run: pnpm run test:types
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-24.04-arm
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Copy README into packages
+        run: |
+          for pkg in packages/*/; do
+            cp README.md "$pkg/README.md"
+          done
+
+      - name: Publish packages
+        run: |
+          for pkg in \
+            packages/router-testing-core \
+            packages/react-start-testing \
+            packages/react-router-testing \
+            packages/react-start-testing-storybook; do
+            name=$(jq -r .name "$pkg/package.json")
+            version=$(jq -r .version "$pkg/package.json")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "::notice::$name@$version already published — skipping"
+            else
+              echo "Publishing $name@$version"
+              pnpm publish "$pkg" --provenance --access public --no-git-checks
+            fi
+            sleep 10
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Pack tarballs for attestation
+        run: |
+          mkdir -p attestation-subjects
+          dest="$(pwd)/attestation-subjects"
+          for pkg in packages/*/; do
+            (cd "$pkg" && pnpm pack --pack-destination "$dest")
+          done
+          echo "=== Attestation subjects ==="
+          ls -l attestation-subjects/
+        env:
+          npm_config_ignore_scripts: true
+
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: attestation-subjects/*.tgz
+
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-24.04-arm
+    needs: publish
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          generate_release_notes: true
