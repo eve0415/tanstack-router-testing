@@ -1,7 +1,8 @@
 name: ci
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
 
 concurrency:
@@ -12,8 +13,80 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: build · lint · test · types
+  build:
+    name: Build
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter="./packages/*" run build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter="./packages/*" run build
+
+      - name: Lint
+        run: oxlint --report-unused-disable-directives --ignore-path .oxlintignore
+
+  format:
+    name: Format
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: oxfmt --check
+
+  test:
+    name: Test
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     steps:
@@ -33,32 +106,33 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm run build
-
-      - name: Lint + format check
-        run: pnpm run lint:check
+        run: pnpm --filter="./packages/*" run build
 
       - name: Core unit tests
-        run: pnpm run test:unit:core
+        run: |
+          pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --passWithNoTests
+          pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --passWithNoTests
+          pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --passWithNoTests
+          pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --passWithNoTests
 
       - name: Vendored parity
-        run: pnpm run test:vendored:parity
+        run: node scripts/check-vendor-test-parity.mjs
+
+      - name: Prepare vendored tests
+        run: node scripts/gen-vendor-smoke-tests.mjs
 
       - name: Vendored examples
-        run: pnpm run test:unit:vendored:examples
+        run: pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/examples-react --passWithNoTests
 
       - name: Vendored React Router e2e apps
-        run: pnpm run test:unit:vendored:e2e-router
+        run: pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/e2e-react-router --passWithNoTests
 
       - name: Vendored React Start e2e apps
-        run: pnpm run test:unit:vendored:e2e-start
-
-      - name: Type tests
-        run: pnpm run test:types
+        run: pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/e2e-react-start --passWithNoTests
 
   coverage:
     name: Coverage
-    needs: ci
+    needs: [build, lint, format, test]
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
@@ -82,11 +156,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm run build
+        run: pnpm --filter="./packages/*" run build
 
       - name: Generate coverage
         run: |
-          pnpm run test:unit:coverage 2>&1 | tee coverage.txt
+          {
+            pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
+            pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
+            pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
+            pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests
+          } 2>&1 | tee coverage.txt
           {
             echo '## Coverage Report'
             echo ''
