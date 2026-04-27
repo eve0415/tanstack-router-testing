@@ -60,7 +60,7 @@ jobs:
         run: pnpm --filter="./packages/*" run build
 
       - name: Lint
-        run: oxlint --report-unused-disable-directives --ignore-path .oxlintignore
+        run: pnpm exec oxlint --report-unused-disable-directives --ignore-path .oxlintignore
 
   format:
     name: Format
@@ -83,7 +83,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Format check
-        run: oxfmt --check
+        run: pnpm exec oxfmt --check
 
   test:
     name: Test
