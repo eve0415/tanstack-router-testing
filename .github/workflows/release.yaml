@@ -68,8 +68,6 @@ jobs:
             fi
             sleep 10
           done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Pack tarballs for attestation
         run: |
