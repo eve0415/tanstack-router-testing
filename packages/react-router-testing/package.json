@@ -1,6 +1,6 @@
 {
   "name": "@tanstack-router-testing/react-router-testing",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Upstream-shaped test helpers for @tanstack/react-router: createTestRouter and createRouterHarness.",
   "keywords": [
     "react",
