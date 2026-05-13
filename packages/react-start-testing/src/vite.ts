@@ -153,8 +153,15 @@ const VIRTUAL_MODULE_IDS = new Set([
  */
 const tanstackStartVirtualStubs = (): Plugin => ({
   name: 'tanstack-start-testing:virtual-stubs',
-  resolveId(id) {
-    return VIRTUAL_MODULE_IDS.has(id) ? `\0${id}` : undefined;
+  config() {
+    return {
+      resolve: {
+        alias: [...VIRTUAL_MODULE_IDS].map(id => ({
+          find: id,
+          replacement: `\0${id}`,
+        })),
+      },
+    };
   },
   load(id) {
     return id.startsWith('\0') && VIRTUAL_MODULE_IDS.has(id.slice(1)) ? 'export default {}; export {};' : undefined;

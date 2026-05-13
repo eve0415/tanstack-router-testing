@@ -1,5 +1,5 @@
 // @vitest-environment node
-import type { Plugin } from 'vite';
+import type { Plugin, UserConfig } from 'vite';
 
 import { describe, expect, it } from 'vitest';
 
@@ -19,23 +19,27 @@ const VIRTUAL_MODULE_IDS = [
 const getPlugin = (name: string): Plugin | undefined => tanstackStartTesting().find(p => p.name === name);
 
 describe('tanstack-start-testing:virtual-stubs plugin', () => {
-  it('resolves all known virtual module IDs', () => {
+  it('returns alias entries for all known virtual module IDs', () => {
     const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
     expect(plugin).toBeDefined();
 
-    const resolveId = plugin?.resolveId as Function;
+    const config = (plugin?.config as Function).call({}) as UserConfig;
+    const aliases = config.resolve?.alias;
+    expect(aliases).toBeDefined();
+    expect(Array.isArray(aliases)).toBe(true);
+
     for (const id of VIRTUAL_MODULE_IDS) {
-      expect(resolveId.call({}, id)).toBe(`\0${id}`);
+      expect(aliases).toContainEqual({ find: id, replacement: `\0${id}` });
     }
   });
 
-  it('does not resolve unrelated IDs', () => {
-    const resolveId = getPlugin('tanstack-start-testing:virtual-stubs')?.resolveId as Function;
-    expect(resolveId.call({}, 'react')).toBeUndefined();
-    expect(resolveId.call({}, '#other-module')).toBeUndefined();
+  it('does not include unrelated aliases', () => {
+    const config = (getPlugin('tanstack-start-testing:virtual-stubs')?.config as Function).call({}) as UserConfig;
+    const aliases = config.resolve?.alias as Array<{ find: string; replacement: string }>;
+    expect(aliases).toHaveLength(VIRTUAL_MODULE_IDS.length);
   });
 
-  it('loads empty stub content for resolved IDs', () => {
+  it('loads empty stub content for null-byte prefixed IDs', () => {
     const load = getPlugin('tanstack-start-testing:virtual-stubs')?.load as Function;
     for (const id of VIRTUAL_MODULE_IDS) {
       expect(load.call({}, `\0${id}`)).toBeDefined();
