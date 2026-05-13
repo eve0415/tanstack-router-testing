@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { tanstackStartTesting } from '../../src/vite.ts';
 
 const getPlugin = (name: string): Plugin | undefined => tanstackStartTesting().find(p => p.name === name);
+const getRscPlugin = (name: string): Plugin | undefined => tanstackStartTesting({ rsc: true }).find(p => p.name === name);
 
 describe('tanstack-start-testing:browser-compat plugin', () => {
   it('resolves @tanstack/start-storage-context to virtual stub in client environment', () => {
@@ -39,5 +40,20 @@ describe('tanstack-start-testing:browser-compat plugin', () => {
     expect(result).toContain('getStartContext');
     expect(result).toContain('runWithStartContext');
     expect(result).not.toContain('node:async_hooks');
+  });
+});
+
+describe('@tanstack/react-start/testing-rsc-runtime plugin', () => {
+  it('excludes @tanstack/react-start-rsc from client pre-bundling', () => {
+    const plugin = getRscPlugin('@tanstack/react-start/testing-rsc-runtime');
+    expect(plugin).toBeDefined();
+    const configHook = plugin?.config as Function;
+    const config = configHook.call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
+    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/react-start-rsc');
+  });
+
+  it('is not included when rsc option is false', () => {
+    const plugin = tanstackStartTesting().find(p => p.name === '@tanstack/react-start/testing-rsc-runtime');
+    expect(plugin).toBeUndefined();
   });
 });

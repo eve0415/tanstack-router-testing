@@ -173,6 +173,17 @@ const RESOLVED_VIRTUAL_RSC_RUNTIME = '\0@tanstack/react-start/testing/rsc-runtim
 
 const tanstackStartRscTestingRuntime = (): Plugin => ({
   name: '@tanstack/react-start/testing-rsc-runtime',
+  config() {
+    return {
+      environments: {
+        client: {
+          optimizeDeps: {
+            exclude: ['@tanstack/react-start-rsc'],
+          },
+        },
+      },
+    };
+  },
   resolveId(id) {
     return id === VIRTUAL_RSC_RUNTIME ? RESOLVED_VIRTUAL_RSC_RUNTIME : undefined;
   },
