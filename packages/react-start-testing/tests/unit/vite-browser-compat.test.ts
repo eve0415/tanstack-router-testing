@@ -1,0 +1,33 @@
+// @vitest-environment node
+import type { Plugin } from 'vite';
+
+import { describe, expect, it } from 'vitest';
+
+import { tanstackStartTesting } from '../../src/vite.ts';
+
+const getPlugin = (name: string): Plugin | undefined => tanstackStartTesting().find(p => p.name === name);
+
+describe('tanstack-start-testing:browser-compat plugin', () => {
+  it('resolves @tanstack/start-storage-context to virtual stub in client environment', () => {
+    const plugin = getPlugin('tanstack-start-testing:browser-compat');
+    expect(plugin).toBeDefined();
+
+    const resolveId = plugin?.resolveId as Function;
+    const clientCtx = { environment: { name: 'client' } };
+    expect(resolveId.call(clientCtx, '@tanstack/start-storage-context')).toBe('\0tanstack-start-storage-context-browser-stub');
+  });
+
+  it('does not intercept @tanstack/start-storage-context in non-client environments', () => {
+    const resolveId = getPlugin('tanstack-start-testing:browser-compat')?.resolveId as Function;
+    const ssrCtx = { environment: { name: 'ssr' } };
+    expect(resolveId.call(ssrCtx, '@tanstack/start-storage-context')).toBeUndefined();
+  });
+
+  it('loads a browser-safe stub module', () => {
+    const load = getPlugin('tanstack-start-testing:browser-compat')?.load as Function;
+    const result = load.call({}, '\0tanstack-start-storage-context-browser-stub') as string;
+    expect(result).toContain('getStartContext');
+    expect(result).toContain('runWithStartContext');
+    expect(result).not.toContain('node:async_hooks');
+  });
+});
