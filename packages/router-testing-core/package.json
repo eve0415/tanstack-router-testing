@@ -1,6 +1,6 @@
 {
   "name": "@tanstack-router-testing/router-testing-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Internal runtime primitives for TanStack Router/Start test harnesses.",
   "keywords": [
     "router",
