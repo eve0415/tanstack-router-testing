@@ -5,11 +5,12 @@ import { describe, expect, it } from 'vitest';
 
 import { tanstackStartTesting } from '../../src/vite.ts';
 
-type TestConfig = UserConfig & { test: { setupFiles: string[] } };
+type TestConfig = UserConfig & { test?: { setupFiles?: string[] } };
 
-const getTestPluginConfig = (plugins: readonly Plugin[]): TestConfig | undefined => {
+const getTestPluginConfig = (plugins: readonly Plugin[], inputConfig: Record<string, unknown> = {}): TestConfig | undefined => {
   const plugin = plugins.find((p: Plugin) => p.name === '@tanstack/react-start/testing');
-  return (plugin?.config as (() => TestConfig | undefined) | undefined)?.();
+  const configHook = plugin?.config as ((config: Record<string, unknown>) => TestConfig | undefined) | undefined;
+  return configHook?.(inputConfig);
 };
 
 describe('tanstackStartTesting vite plugin', () => {
@@ -32,5 +33,15 @@ describe('tanstackStartTesting vite plugin', () => {
     const config = getTestPluginConfig(tanstackStartTesting({ aliasReactStart: false }));
     expect(config?.resolve).toBeUndefined();
     expect(config?.test?.setupFiles).toContain('src/routeTree.gen.ts');
+  });
+
+  it('omits setupFiles when browser mode is enabled', () => {
+    const config = getTestPluginConfig(tanstackStartTesting(), { test: { browser: { enabled: true } } });
+    expect(config?.test?.setupFiles).toBeUndefined();
+  });
+
+  it('still applies the alias in browser mode', () => {
+    const config = getTestPluginConfig(tanstackStartTesting(), { test: { browser: { enabled: true } } });
+    expect(config?.resolve?.alias).toBeDefined();
   });
 });

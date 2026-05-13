@@ -75,8 +75,9 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
     ...(options.rsc === true ? [tanstackStartRscTestingRuntime()] : []),
     {
       name: '@tanstack/react-start/testing',
-      config(): UserConfig & { test: { setupFiles: readonly string[] } } {
+      config(config: UserConfig & { test?: { browser?: { enabled?: boolean } } }) {
         const genPath = routerPluginOptions.generatedRouteTree;
+        const isBrowser = config.test?.browser?.enabled === true;
         return {
           ...(options.aliasReactStart !== false
             ? {
@@ -90,9 +91,7 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
                 },
               }
             : {}),
-          test: {
-            setupFiles: [genPath],
-          },
+          ...(!isBrowser ? { test: { setupFiles: [genPath] } } : {}),
         };
       },
     },
