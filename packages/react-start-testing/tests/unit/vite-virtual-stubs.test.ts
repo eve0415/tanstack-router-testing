@@ -22,11 +22,11 @@ describe('tanstack-start-testing:virtual-stubs plugin', () => {
   it('returns alias entries for all known virtual module IDs', () => {
     const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
     expect(plugin).toBeDefined();
-
-    const config = (plugin?.config as Function).call({}) as UserConfig;
+    const configHook = plugin?.config as Function;
+    const config = configHook.call({}) as UserConfig;
     const aliases = config.resolve?.alias;
     expect(aliases).toBeDefined();
-    expect(Array.isArray(aliases)).toBe(true);
+    expect(Array.isArray(aliases)).toBeTruthy();
 
     for (const id of VIRTUAL_MODULE_IDS) {
       expect(aliases).toContainEqual({ find: id, replacement: `\0${id}` });
@@ -34,8 +34,11 @@ describe('tanstack-start-testing:virtual-stubs plugin', () => {
   });
 
   it('does not include unrelated aliases', () => {
-    const config = (getPlugin('tanstack-start-testing:virtual-stubs')?.config as Function).call({}) as UserConfig;
-    const aliases = config.resolve?.alias as Array<{ find: string; replacement: string }>;
+    const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
+    expect(plugin).toBeDefined();
+    const configHook = plugin?.config as Function;
+    const config = configHook.call({}) as UserConfig;
+    const aliases = config.resolve?.alias as { find: string; replacement: string }[];
     expect(aliases).toHaveLength(VIRTUAL_MODULE_IDS.length);
   });
 

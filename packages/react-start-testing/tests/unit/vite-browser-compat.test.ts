@@ -25,7 +25,9 @@ describe('tanstack-start-testing:browser-compat plugin', () => {
 
   it('excludes packages with #tanstack-* imports from client pre-bundling', () => {
     const plugin = getPlugin('tanstack-start-testing:browser-compat');
-    const config = (plugin?.config as Function).call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
+    expect(plugin).toBeDefined();
+    const configHook = plugin?.config as Function;
+    const config = configHook.call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
     expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-storage-context');
     expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-server-core');
     expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-client-core');
