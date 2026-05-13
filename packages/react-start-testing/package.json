@@ -1,6 +1,6 @@
 {
   "name": "@tanstack-router-testing/react-start-testing",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-start: direct server function tests, mocks, env control, and Vitest wiring.",
   "keywords": [
     "react",
