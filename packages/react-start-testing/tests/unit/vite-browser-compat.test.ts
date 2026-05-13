@@ -23,6 +23,14 @@ describe('tanstack-start-testing:browser-compat plugin', () => {
     expect(resolveId.call(ssrCtx, '@tanstack/start-storage-context')).toBeUndefined();
   });
 
+  it('excludes packages with #tanstack-* imports from client pre-bundling', () => {
+    const plugin = getPlugin('tanstack-start-testing:browser-compat');
+    const config = (plugin?.config as Function).call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
+    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-storage-context');
+    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-server-core');
+    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-client-core');
+  });
+
   it('loads a browser-safe stub module', () => {
     const load = getPlugin('tanstack-start-testing:browser-compat')?.load as Function;
     const result = load.call({}, '\0tanstack-start-storage-context-browser-stub') as string;

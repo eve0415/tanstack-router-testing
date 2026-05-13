@@ -118,7 +118,7 @@ const tanstackStartBrowserCompat = (): Plugin => ({
       environments: {
         client: {
           optimizeDeps: {
-            exclude: ['@tanstack/start-storage-context'],
+            exclude: ['@tanstack/start-storage-context', '@tanstack/start-server-core', '@tanstack/start-client-core'],
           },
         },
       },
