@@ -38,6 +38,10 @@
       "types": "./dist/shim.d.mts",
       "import": "./dist/shim.mjs"
     },
+    "./server-shim": {
+      "types": "./dist/server-shim.d.mts",
+      "import": "./dist/server-shim.mjs"
+    },
     "./vite": {
       "types": "./dist/vite.d.mts",
       "import": "./dist/vite.mjs"
@@ -57,6 +61,7 @@
     "@tanstack/router-plugin": "1.167.25",
     "@tanstack/start-client-core": "1.167.18",
     "@tanstack/start-fn-stubs": "1.161.6",
+    "@tanstack/start-server-core": "1.167.20",
     "@tanstack/start-storage-context": "1.166.30"
   },
   "devDependencies": {

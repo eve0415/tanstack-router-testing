@@ -243,6 +243,9 @@ importers:
       '@tanstack/start-fn-stubs':
         specifier: 1.161.6
         version: 1.161.6
+      '@tanstack/start-server-core':
+        specifier: 1.167.20
+        version: 1.167.20
       '@tanstack/start-storage-context':
         specifier: 1.166.30
         version: 1.166.30

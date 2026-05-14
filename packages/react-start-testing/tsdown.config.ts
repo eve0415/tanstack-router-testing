@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/browser.ts', 'src/shim.ts', 'src/vite.ts'],
+  entry: ['src/index.ts', 'src/browser.ts', 'src/shim.ts', 'src/server-shim.ts', 'src/vite.ts'],
   format: ['esm'],
   dts: true,
   clean: true,
@@ -14,7 +14,10 @@ export default defineConfig({
       '@tanstack/router-plugin',
       '@tanstack/start-client-core',
       '@tanstack/start-fn-stubs',
+      '@tanstack/start-server-core',
       '@tanstack/start-storage-context',
+      '@tanstack/router-core',
+      '@tanstack/router-core/ssr/server',
       '@testing-library/react',
       'vite',
       'react',
