@@ -55,9 +55,7 @@ export const HEADERS = {
  * // result === null
  * ```
  */
-export function StartServer(_props: { router: AnyRouter }): null {
-  return null;
-}
+export const StartServer = (_props: { router: AnyRouter }): null => null;
 
 // ---------------------------------------------------------------------------
 // Throwing stubs — server infrastructure that cannot run in tests
@@ -80,9 +78,7 @@ const throwNotAvailable = (name: string): never => {
  * expect(() => createStartHandler({ handler: () => {} })).toThrow()
  * ```
  */
-export function createStartHandler(_cbOrOptions: HandlerCallback<AnyRouter> | CreateStartHandlerOptions): never {
-  throwNotAvailable('createStartHandler');
-}
+export const createStartHandler = (_cbOrOptions: HandlerCallback<AnyRouter> | CreateStartHandlerOptions): never => throwNotAvailable('createStartHandler');
 
 /**
  * Throws — `requestHandler` requires a full server runtime.
@@ -97,9 +93,7 @@ export function createStartHandler(_cbOrOptions: HandlerCallback<AnyRouter> | Cr
  * expect(() => requestHandler(() => new Response())).toThrow()
  * ```
  */
-export function requestHandler(_handler: (...args: any[]) => any): never {
-  throwNotAvailable('requestHandler');
-}
+export const requestHandler = (_handler: (...args: unknown[]) => unknown): never => throwNotAvailable('requestHandler');
 
 /**
  * Throws — `defaultStreamHandler` requires a full server runtime.
@@ -113,9 +107,7 @@ export function requestHandler(_handler: (...args: any[]) => any): never {
  * expect(() => defaultStreamHandler({} as any)).toThrow()
  * ```
  */
-export const defaultStreamHandler: HandlerCallback<AnyRouter> = () => {
-  throwNotAvailable('defaultStreamHandler');
-};
+export const defaultStreamHandler: HandlerCallback<AnyRouter> = () => throwNotAvailable('defaultStreamHandler');
 
 /**
  * Throws — `defaultRenderHandler` requires a full server runtime.
@@ -129,9 +121,7 @@ export const defaultStreamHandler: HandlerCallback<AnyRouter> = () => {
  * expect(() => defaultRenderHandler({} as any)).toThrow()
  * ```
  */
-export const defaultRenderHandler: HandlerCallback<AnyRouter> = () => {
-  throwNotAvailable('defaultRenderHandler');
-};
+export const defaultRenderHandler: HandlerCallback<AnyRouter> = () => throwNotAvailable('defaultRenderHandler');
 
 /**
  * Throws — `createRequestHandler` requires a full server runtime.
@@ -146,9 +136,7 @@ export const defaultRenderHandler: HandlerCallback<AnyRouter> = () => {
  * expect(() => createRequestHandler({})).toThrow()
  * ```
  */
-export function createRequestHandler(_opts: any): never {
-  throwNotAvailable('createRequestHandler');
-}
+export const createRequestHandler = (_opts: unknown): never => throwNotAvailable('createRequestHandler');
 
 /**
  * Identity wrapper — returns the callback unchanged.
@@ -164,9 +152,7 @@ export function createRequestHandler(_opts: any): never {
  * expect(defineHandlerCallback(cb)).toBe(cb)
  * ```
  */
-export function defineHandlerCallback<TRouter extends AnyRouter>(handler: HandlerCallback<TRouter>): HandlerCallback<TRouter> {
-  return handler;
-}
+export const defineHandlerCallback = <TRouter extends AnyRouter>(handler: HandlerCallback<TRouter>): HandlerCallback<TRouter> => handler;
 
 /**
  * Throws — `useSession` requires Node crypto and a real request context.
@@ -178,12 +164,10 @@ export function defineHandlerCallback<TRouter extends AnyRouter>(handler: Handle
  * ```ts
  * import { useSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(useSession({ password: 'x' })).rejects.toThrow()
+ * expect(() => useSession({ password: 'x' })).toThrow()
  * ```
  */
-export async function useSession(_config: SessionConfig): Promise<never> {
-  throwNotAvailable('useSession');
-}
+export const useSession = (_config: SessionConfig): never => throwNotAvailable('useSession');
 
 /**
  * Throws — `getSession` requires Node crypto and a real request context.
@@ -195,12 +179,10 @@ export async function useSession(_config: SessionConfig): Promise<never> {
  * ```ts
  * import { getSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(getSession({ password: 'x' })).rejects.toThrow()
+ * expect(() => getSession({ password: 'x' })).toThrow()
  * ```
  */
-export async function getSession(_config: SessionConfig): Promise<never> {
-  throwNotAvailable('getSession');
-}
+export const getSession = (_config: SessionConfig): never => throwNotAvailable('getSession');
 
 /**
  * Throws — `updateSession` requires Node crypto and a real request context.
@@ -213,12 +195,10 @@ export async function getSession(_config: SessionConfig): Promise<never> {
  * ```ts
  * import { updateSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(updateSession({ password: 'x' })).rejects.toThrow()
+ * expect(() => updateSession({ password: 'x' })).toThrow()
  * ```
  */
-export async function updateSession(_config: SessionConfig, _update?: unknown): Promise<never> {
-  throwNotAvailable('updateSession');
-}
+export const updateSession = (_config: SessionConfig, _update?: unknown): never => throwNotAvailable('updateSession');
 
 /**
  * Throws — `sealSession` requires Node crypto.
@@ -230,12 +210,10 @@ export async function updateSession(_config: SessionConfig, _update?: unknown): 
  * ```ts
  * import { sealSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(sealSession({ password: 'x' })).rejects.toThrow()
+ * expect(() => sealSession({ password: 'x' })).toThrow()
  * ```
  */
-export async function sealSession(_config: SessionConfig): Promise<never> {
-  throwNotAvailable('sealSession');
-}
+export const sealSession = (_config: SessionConfig): never => throwNotAvailable('sealSession');
 
 /**
  * Throws — `unsealSession` requires Node crypto.
@@ -248,12 +226,10 @@ export async function sealSession(_config: SessionConfig): Promise<never> {
  * ```ts
  * import { unsealSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(unsealSession({ password: 'x' }, 'sealed')).rejects.toThrow()
+ * expect(() => unsealSession({ password: 'x' }, 'sealed')).toThrow()
  * ```
  */
-export async function unsealSession(_config: SessionConfig, _sealed: string): Promise<never> {
-  throwNotAvailable('unsealSession');
-}
+export const unsealSession = (_config: SessionConfig, _sealed: string): never => throwNotAvailable('unsealSession');
 
 /**
  * Throws — `clearSession` requires Node crypto and a real request context.
@@ -265,12 +241,10 @@ export async function unsealSession(_config: SessionConfig, _sealed: string): Pr
  * ```ts
  * import { clearSession } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * await expect(clearSession({ password: 'x' })).rejects.toThrow()
+ * expect(() => clearSession({ password: 'x' })).toThrow()
  * ```
  */
-export async function clearSession(_config: Partial<SessionConfig>): Promise<never> {
-  throwNotAvailable('clearSession');
-}
+export const clearSession = (_config: Partial<SessionConfig>): never => throwNotAvailable('clearSession');
 
 /**
  * Throws — `transformReadableStreamWithRouter` requires a real server runtime.
@@ -284,9 +258,7 @@ export async function clearSession(_config: Partial<SessionConfig>): Promise<nev
  * expect(() => transformReadableStreamWithRouter({} as any)).toThrow()
  * ```
  */
-export function transformReadableStreamWithRouter(..._args: any[]): never {
-  throwNotAvailable('transformReadableStreamWithRouter');
-}
+export const transformReadableStreamWithRouter = (..._args: unknown[]): never => throwNotAvailable('transformReadableStreamWithRouter');
 
 /**
  * Throws — `transformPipeableStreamWithRouter` requires a real server runtime.
@@ -300,9 +272,7 @@ export function transformReadableStreamWithRouter(..._args: any[]): never {
  * expect(() => transformPipeableStreamWithRouter({} as any)).toThrow()
  * ```
  */
-export function transformPipeableStreamWithRouter(..._args: any[]): never {
-  throwNotAvailable('transformPipeableStreamWithRouter');
-}
+export const transformPipeableStreamWithRouter = (..._args: unknown[]): never => throwNotAvailable('transformPipeableStreamWithRouter');
 
 // ---------------------------------------------------------------------------
 // No-op stubs — safe to call in tests, return sensible defaults
@@ -320,7 +290,7 @@ export function transformPipeableStreamWithRouter(..._args: any[]): never {
  * attachRouterServerSsrUtils({}) // no-op
  * ```
  */
-export function attachRouterServerSsrUtils(..._args: any[]): void {}
+export const attachRouterServerSsrUtils = (..._args: unknown[]): void => {};
 
 /**
  * Returns `200` — the default HTTP status code.
@@ -334,9 +304,7 @@ export function attachRouterServerSsrUtils(..._args: any[]): void {}
  * expect(getResponseStatus()).toBe(200)
  * ```
  */
-export function getResponseStatus(): number {
-  return 200;
-}
+export const getResponseStatus = (): number => 200;
 
 /**
  * No-op — sets the response status code. Does nothing in tests.
@@ -351,7 +319,7 @@ export function getResponseStatus(): number {
  * setResponseStatus(404, 'Not Found') // no-op
  * ```
  */
-export function setResponseStatus(_code?: number, _text?: string): void {}
+export const setResponseStatus = (_code?: number, _text?: string): void => {};
 
 /**
  * Returns a localhost URL — no real request context in tests.
@@ -366,9 +334,7 @@ export function setResponseStatus(_code?: number, _text?: string): void {}
  * expect(getRequestUrl().href).toBe('http://localhost/')
  * ```
  */
-export function getRequestUrl(_opts?: { xForwardedFor?: boolean }): URL {
-  return new URL('http://localhost/');
-}
+export const getRequestUrl = (_opts?: { xForwardedFor?: boolean }): URL => new URL('http://localhost/');
 
 /**
  * Returns a minimal `Request` pointing at localhost.
@@ -382,9 +348,7 @@ export function getRequestUrl(_opts?: { xForwardedFor?: boolean }): URL {
  * expect(getRequest().url).toBe('http://localhost/')
  * ```
  */
-export function getRequest(): Request {
-  return new Request('http://localhost/');
-}
+export const getRequest = (): Request => new Request('http://localhost/');
 
 /**
  * Returns `undefined` — no request headers available in tests.
@@ -399,9 +363,7 @@ export function getRequest(): Request {
  * expect(getRequestHeader('content-type')).toBeUndefined()
  * ```
  */
-export function getRequestHeader(_name: string): string | undefined {
-  return undefined;
-}
+export const getRequestHeader = (_name: string): string | undefined => undefined;
 
 /**
  * Returns an empty object — no request headers available in tests.
@@ -415,9 +377,7 @@ export function getRequestHeader(_name: string): string | undefined {
  * expect(getRequestHeaders()).toEqual({})
  * ```
  */
-export function getRequestHeaders(): Record<string, string | undefined> {
-  return {};
-}
+export const getRequestHeaders = (): Record<string, string | undefined> => ({});
 
 /**
  * Returns `undefined` — no client IP available in tests.
@@ -432,9 +392,7 @@ export function getRequestHeaders(): Record<string, string | undefined> {
  * expect(getRequestIP()).toBeUndefined()
  * ```
  */
-export function getRequestIP(_opts?: { xForwardedFor?: boolean }): string | undefined {
-  return undefined;
-}
+export const getRequestIP = (_opts?: { xForwardedFor?: boolean }): string | undefined => undefined;
 
 /**
  * Returns `'localhost'`.
@@ -449,9 +407,7 @@ export function getRequestIP(_opts?: { xForwardedFor?: boolean }): string | unde
  * expect(getRequestHost()).toBe('localhost')
  * ```
  */
-export function getRequestHost(_opts?: { xForwardedFor?: boolean }): string {
-  return 'localhost';
-}
+export const getRequestHost = (_opts?: { xForwardedFor?: boolean }): string => 'localhost';
 
 /**
  * Returns `'http'`.
@@ -466,9 +422,7 @@ export function getRequestHost(_opts?: { xForwardedFor?: boolean }): string {
  * expect(getRequestProtocol()).toBe('http')
  * ```
  */
-export function getRequestProtocol(_opts?: { xForwardedFor?: boolean }): string {
-  return 'http';
-}
+export const getRequestProtocol = (_opts?: { xForwardedFor?: boolean }): string => 'http';
 
 /**
  * Returns `undefined` — no cookies available in tests.
@@ -483,9 +437,7 @@ export function getRequestProtocol(_opts?: { xForwardedFor?: boolean }): string 
  * expect(getCookie('session')).toBeUndefined()
  * ```
  */
-export function getCookie(_name: string): string | undefined {
-  return undefined;
-}
+export const getCookie = (_name: string): string | undefined => undefined;
 
 /**
  * Returns an empty object — no cookies available in tests.
@@ -499,9 +451,7 @@ export function getCookie(_name: string): string | undefined {
  * expect(getCookies()).toEqual({})
  * ```
  */
-export function getCookies(): Record<string, string> {
-  return {};
-}
+export const getCookies = (): Record<string, string> => ({});
 
 /**
  * No-op — sets a cookie. Does nothing in tests.
@@ -517,7 +467,7 @@ export function getCookies(): Record<string, string> {
  * setCookie('session', 'abc123') // no-op
  * ```
  */
-export function setCookie(_name: string, _value: string, _options?: Record<string, unknown>): void {}
+export const setCookie = (_name: string, _value: string, _options?: Record<string, unknown>): void => {};
 
 /**
  * No-op — deletes a cookie. Does nothing in tests.
@@ -532,7 +482,7 @@ export function setCookie(_name: string, _value: string, _options?: Record<strin
  * deleteCookie('session') // no-op
  * ```
  */
-export function deleteCookie(_name: string, _options?: Record<string, unknown>): void {}
+export const deleteCookie = (_name: string, _options?: Record<string, unknown>): void => {};
 
 /**
  * Returns a default response shape with status 200.
@@ -546,9 +496,12 @@ export function deleteCookie(_name: string, _options?: Record<string, unknown>):
  * expect(getResponse().status).toBe(200)
  * ```
  */
-export function getResponse(): { status: number; statusText: string; headers: Headers; errHeaders: Headers } {
-  return { status: 200, statusText: 'OK', headers: new Headers(), errHeaders: new Headers() };
-}
+export const getResponse = (): { status: number; statusText: string; headers: Headers; errHeaders: Headers } => ({
+  status: 200,
+  statusText: 'OK',
+  headers: new Headers(),
+  errHeaders: new Headers(),
+});
 
 /**
  * Returns `undefined` — no response headers set in tests.
@@ -563,9 +516,7 @@ export function getResponse(): { status: number; statusText: string; headers: He
  * expect(getResponseHeader('x-custom')).toBeUndefined()
  * ```
  */
-export function getResponseHeader(_name: string): string | undefined {
-  return undefined;
-}
+export const getResponseHeader = (_name: string): string | undefined => undefined;
 
 /**
  * Returns an empty object — no response headers set in tests.
@@ -579,9 +530,7 @@ export function getResponseHeader(_name: string): string | undefined {
  * expect(getResponseHeaders()).toEqual({})
  * ```
  */
-export function getResponseHeaders(): Record<string, string | undefined> {
-  return {};
-}
+export const getResponseHeaders = (): Record<string, string | undefined> => ({});
 
 /**
  * No-op — sets a response header. Does nothing in tests.
@@ -596,7 +545,7 @@ export function getResponseHeaders(): Record<string, string | undefined> {
  * setResponseHeader('x-custom', 'value') // no-op
  * ```
  */
-export function setResponseHeader(_name: string, _value: string | string[]): void {}
+export const setResponseHeader = (_name: string, _value: string | string[]): void => {};
 
 /**
  * No-op — sets multiple response headers. Does nothing in tests.
@@ -610,7 +559,7 @@ export function setResponseHeader(_name: string, _value: string | string[]): voi
  * setResponseHeaders({ 'x-custom': 'value' }) // no-op
  * ```
  */
-export function setResponseHeaders(_headers: Record<string, string | string[] | undefined>): void {}
+export const setResponseHeaders = (_headers: Record<string, string | string[] | undefined>): void => {};
 
 /**
  * No-op — removes a response header. Does nothing in tests.
@@ -624,7 +573,7 @@ export function setResponseHeaders(_headers: Record<string, string | string[] | 
  * removeResponseHeader('x-custom') // no-op
  * ```
  */
-export function removeResponseHeader(_name: string): void {}
+export const removeResponseHeader = (_name: string): void => {};
 
 /**
  * No-op — clears response headers. Does nothing in tests.
@@ -638,7 +587,7 @@ export function removeResponseHeader(_name: string): void {}
  * clearResponseHeaders() // no-op
  * ```
  */
-export function clearResponseHeaders(_headerNames?: string[]): void {}
+export const clearResponseHeaders = (_headerNames?: string[]): void => {};
 
 /**
  * Returns `undefined` — no request context available for query validation in tests.
@@ -654,6 +603,4 @@ export function clearResponseHeaders(_headerNames?: string[]): void {}
  * expect(result).toBeUndefined()
  * ```
  */
-export async function getValidatedQuery(_schema: unknown): Promise<undefined> {
-  return undefined;
-}
+export const getValidatedQuery = (_schema: unknown): undefined => undefined;

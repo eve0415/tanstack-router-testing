@@ -49,7 +49,9 @@ describe('server-shim no-op stubs', () => {
   });
 
   it('setResponseStatus does not throw', () => {
-    expect(() => setResponseStatus(404, 'Not Found')).not.toThrow();
+    expect(() => {
+      setResponseStatus(404, 'Not Found');
+    }).not.toThrow();
   });
 
   it('getRequestUrl returns a localhost URL', () => {
@@ -69,7 +71,7 @@ describe('server-shim no-op stubs', () => {
   });
 
   it('getRequestHeaders returns empty object', () => {
-    expect(getRequestHeaders()).toEqual({});
+    expect(getRequestHeaders()).toStrictEqual({});
   });
 
   it('getRequestIP returns undefined', () => {
@@ -89,15 +91,19 @@ describe('server-shim no-op stubs', () => {
   });
 
   it('getCookies returns empty object', () => {
-    expect(getCookies()).toEqual({});
+    expect(getCookies()).toStrictEqual({});
   });
 
   it('setCookie does not throw', () => {
-    expect(() => setCookie('key', 'val')).not.toThrow();
+    expect(() => {
+      setCookie('key', 'val');
+    }).not.toThrow();
   });
 
   it('deleteCookie does not throw', () => {
-    expect(() => deleteCookie('key')).not.toThrow();
+    expect(() => {
+      deleteCookie('key');
+    }).not.toThrow();
   });
 
   it('getResponse returns default shape', () => {
@@ -113,77 +119,75 @@ describe('server-shim no-op stubs', () => {
   });
 
   it('getResponseHeaders returns empty object', () => {
-    expect(getResponseHeaders()).toEqual({});
+    expect(getResponseHeaders()).toStrictEqual({});
   });
 
   it('setResponseHeader does not throw', () => {
-    expect(() => setResponseHeader('x-custom', 'value')).not.toThrow();
+    expect(() => {
+      setResponseHeader('x-custom', 'value');
+    }).not.toThrow();
   });
 
   it('setResponseHeaders does not throw', () => {
-    expect(() => setResponseHeaders({ 'x-custom': 'value' })).not.toThrow();
+    expect(() => {
+      setResponseHeaders({ 'x-custom': 'value' });
+    }).not.toThrow();
   });
 
   it('removeResponseHeader does not throw', () => {
-    expect(() => removeResponseHeader('x-custom')).not.toThrow();
+    expect(() => {
+      removeResponseHeader('x-custom');
+    }).not.toThrow();
   });
 
   it('clearResponseHeaders does not throw', () => {
-    expect(() => clearResponseHeaders()).not.toThrow();
+    expect(() => {
+      clearResponseHeaders();
+    }).not.toThrow();
   });
 
-  it('getValidatedQuery returns undefined', async () => {
-    expect(await getValidatedQuery({})).toBeUndefined();
+  it('getValidatedQuery returns undefined', () => {
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -- stub intentionally returns undefined
+    expect(getValidatedQuery({})).toBeUndefined();
   });
 
   it('attachRouterServerSsrUtils does not throw', () => {
-    expect(() => attachRouterServerSsrUtils({})).not.toThrow();
+    expect(() => {
+      attachRouterServerSsrUtils({});
+    }).not.toThrow();
   });
 });
 
 describe('server-shim throwing stubs', () => {
-  const throwingFns = [
-    ['createStartHandler', () => createStartHandler({} as any)],
+  it.each([
+    ['createStartHandler', () => createStartHandler({} as never)],
     ['requestHandler', () => requestHandler(() => new Response())],
-    ['defaultStreamHandler', () => defaultStreamHandler({} as any)],
-    ['defaultRenderHandler', () => defaultRenderHandler({} as any)],
+    ['defaultStreamHandler', () => defaultStreamHandler({} as never)],
+    ['defaultRenderHandler', () => defaultRenderHandler({} as never)],
     ['createRequestHandler', () => createRequestHandler({})],
     ['transformReadableStreamWithRouter', () => transformReadableStreamWithRouter()],
     ['transformPipeableStreamWithRouter', () => transformPipeableStreamWithRouter()],
-  ] as const;
-
-  for (const [name, fn] of throwingFns) {
-    it(`${name} throws with descriptive message`, () => {
-      expect(fn).toThrow(`[react-start-testing] ${name}() is not available in tests`);
-    });
-  }
-
-  const asyncThrowingFns = [
     ['useSession', () => useSession({ password: 'x' })],
     ['getSession', () => getSession({ password: 'x' })],
     ['updateSession', () => updateSession({ password: 'x' })],
     ['sealSession', () => sealSession({ password: 'x' })],
     ['unsealSession', () => unsealSession({ password: 'x' }, 'sealed')],
     ['clearSession', () => clearSession({ password: 'x' })],
-  ] as const;
-
-  for (const [name, fn] of asyncThrowingFns) {
-    it(`${name} throws with descriptive message`, async () => {
-      await expect(fn()).rejects.toThrow(`[react-start-testing] ${name}() is not available in tests`);
-    });
-  }
+  ] as const)('%s throws with descriptive message', (name, fn) => {
+    expect(fn).toThrow(`[react-start-testing] ${name}() is not available in tests`);
+  });
 });
 
 describe('server-shim identity wrappers', () => {
   it('defineHandlerCallback returns the same callback', () => {
-    const cb = (() => new Response()) as any;
+    const cb = (() => new Response()) as never;
     expect(defineHandlerCallback(cb)).toBe(cb);
   });
 });
 
 describe('server-shim constants', () => {
-  it('VIRTUAL_MODULES has expected keys', () => {
-    expect(VIRTUAL_MODULES).toEqual({
+  it('exports expected virtual module IDs', () => {
+    expect(VIRTUAL_MODULES).toStrictEqual({
       startManifest: 'tanstack-start-manifest:v',
       injectedHeadScripts: 'tanstack-start-injected-head-scripts:v',
       serverFnResolver: '#tanstack-start-server-fn-resolver',
@@ -191,13 +195,13 @@ describe('server-shim constants', () => {
     });
   });
 
-  it('HEADERS has TSS_SHELL', () => {
-    expect(HEADERS).toEqual({ TSS_SHELL: 'X-TSS_SHELL' });
+  it('exports expected header constants', () => {
+    expect(HEADERS).toStrictEqual({ TSS_SHELL: 'X-TSS_SHELL' });
   });
 });
 
 describe('server-shim StartServer component', () => {
   it('returns null', () => {
-    expect(StartServer({ router: {} as any })).toBeNull();
+    expect(StartServer({ router: {} as never })).toBeNull();
   });
 });

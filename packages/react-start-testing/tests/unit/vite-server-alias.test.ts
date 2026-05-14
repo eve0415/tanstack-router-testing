@@ -15,7 +15,7 @@ describe('@tanstack/react-start/server alias', () => {
   it('aliases @tanstack/react-start/server to the server-shim', () => {
     const config = getTestingPluginConfig();
     const aliases = config.resolve?.alias as { find: RegExp; replacement: string }[];
-    const serverAlias = aliases?.find(a => a.find.toString() === '/^@tanstack\\/react-start\\/server$/');
+    const serverAlias = aliases?.find(a => a.find.toString() === String.raw`/^@tanstack\/react-start\/server$/`);
     expect(serverAlias).toBeDefined();
     expect(serverAlias?.replacement).toBe('@tanstack-router-testing/react-start-testing/server-shim');
   });
