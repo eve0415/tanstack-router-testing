@@ -18,6 +18,8 @@ export default defineConfig({
       '@tanstack/start-storage-context',
       '@tanstack/router-core',
       '@tanstack/router-core/ssr/server',
+      'h3-v2',
+      'cookie-es',
       '@testing-library/react',
       'vite',
       'react',

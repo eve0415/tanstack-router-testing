@@ -3,11 +3,30 @@ import type { AnyRouter } from '@tanstack/react-router';
 import type { AnyStartInstanceOptions } from '@tanstack/start-client-core';
 import type { StartHandlerType, StartStorageContext } from '@tanstack/start-storage-context';
 
+import { AsyncLocalStorage } from 'node:async_hooks';
+
 import { runWithStartContext } from '@tanstack/start-storage-context';
+import { H3Event } from 'h3-v2';
 
 import { clearStartMocks } from './clearStartMocks.ts';
 import { runInStartEnv } from './isomorphic.ts';
 import { __setStartOptionsForTesting } from './shim.ts';
+
+// ---------------------------------------------------------------------------
+// H3 event storage — shared with @tanstack/start-server-core via Symbol.for
+// ---------------------------------------------------------------------------
+
+const GLOBAL_EVENT_STORAGE_KEY = Symbol.for('tanstack-start:event-storage');
+
+interface StartEvent {
+  h3Event: H3Event;
+}
+
+const getOrCreateEventStorage = (): AsyncLocalStorage<StartEvent> => {
+  const g = globalThis as Record<symbol, AsyncLocalStorage<StartEvent> | undefined>;
+  g[GLOBAL_EVENT_STORAGE_KEY] ??= new AsyncLocalStorage<StartEvent>();
+  return g[GLOBAL_EVENT_STORAGE_KEY];
+};
 
 /**
  * Configuration for {@link createStartTestRuntime}.
@@ -77,6 +96,8 @@ export interface StartTestRuntime {
   readonly request: Request;
   /** The resolved Start options used by the runtime. */
   readonly startOptions: AnyStartInstanceOptions;
+  /** Response snapshot from the most recent `run()` or `call()`. `undefined` before first invocation. */
+  readonly lastResponse: Response | undefined;
   /**
    * Run an arbitrary function inside the Start storage context.
    *
@@ -103,8 +124,8 @@ export interface StartTestRuntime {
     options?: StartTestRunOptions,
   ) => Promise<Awaited<TReturn>>;
   /**
-   * Remove all server-function and middleware mocks. Equivalent to calling
-   * {@link clearStartMocks}.
+   * Remove all server-function and middleware mocks and reset `lastResponse`.
+   * Equivalent to calling {@link clearStartMocks}.
    */
   readonly cleanup: () => void;
 }
@@ -151,6 +172,7 @@ export interface StartTestRuntime {
 export const createStartTestRuntime = async (options: StartTestRuntimeOptions = {}): Promise<StartTestRuntime> => {
   const startOptions = options.startOptions ?? (await options.startInstance?.getOptions()) ?? ({} as AnyStartInstanceOptions);
   const request = toRequest(options.request);
+  const eventStorage = getOrCreateEventStorage();
 
   __setStartOptionsForTesting(startOptions);
 
@@ -168,20 +190,48 @@ export const createStartTestRuntime = async (options: StartTestRuntimeOptions = 
     handlerType: runOptions.handlerType ?? options.handlerType ?? 'serverFn',
   });
 
+  let lastResponse: Response | undefined;
+
+  const snapshotResponse = (h3Event: H3Event): void => {
+    lastResponse = new Response(null, {
+      status: h3Event.res.status ?? 200,
+      statusText: h3Event.res.statusText ?? 'OK',
+      headers: new Headers(h3Event.res.headers),
+    });
+  };
+
   const runtime: StartTestRuntime = {
     request,
     startOptions,
+    get lastResponse() {
+      return lastResponse;
+    },
     run: async (fn, runOptions) => {
       const env = runOptions?.env ?? options.env ?? 'server';
       const storage = createContext(runOptions);
-      return runWithStartContext(storage, async () => {
-        storage.contextAfterGlobalMiddlewares = await executeGlobalRequestMiddlewares(storage, storage.contextAfterGlobalMiddlewares);
-        return runInStartEnv(env, fn);
-      });
+      const req = toRequest(runOptions?.request ?? request);
+      const h3Event = new H3Event(req);
+
+      try {
+        const result = await eventStorage.run({ h3Event }, () =>
+          runWithStartContext(storage, async () => {
+            storage.contextAfterGlobalMiddlewares = await executeGlobalRequestMiddlewares(storage, storage.contextAfterGlobalMiddlewares);
+            return runInStartEnv(env, fn);
+          }),
+        );
+        snapshotResponse(h3Event);
+        return result;
+      } catch (error) {
+        snapshotResponse(h3Event);
+        throw error;
+      }
     },
     call: <TArgs extends readonly unknown[], TReturn>(fn: (...args: TArgs) => TReturn | Promise<TReturn>, args: TArgs, runOptions?: StartTestRunOptions) =>
       runtime.run(() => fn(...args), runOptions) as Promise<Awaited<TReturn>>,
-    cleanup: clearStartMocks,
+    cleanup: () => {
+      lastResponse = undefined;
+      clearStartMocks();
+    },
   };
 
   return runtime;

@@ -1,6 +1,25 @@
 import type { AnyRouter } from '@tanstack/router-core';
 import type { HandlerCallback } from '@tanstack/router-core/ssr/server';
 import type { CreateStartHandlerOptions, SessionConfig } from '@tanstack/start-server-core';
+import type { CookieSerializeOptions } from 'cookie-es';
+
+import { parse as parseCookieHeader, serialize as serializeCookie } from 'cookie-es';
+
+// ---------------------------------------------------------------------------
+// H3Event accessor — browser-safe (no h3-v2 or node:async_hooks import)
+// ---------------------------------------------------------------------------
+
+const GLOBAL_EVENT_STORAGE_KEY = Symbol.for('tanstack-start:event-storage');
+
+interface H3EventLike {
+  readonly req: Request;
+  readonly res: { status?: number; statusText?: string; readonly headers: Headers; readonly errHeaders: Headers };
+}
+
+const tryGetH3Event = (): H3EventLike | undefined => {
+  const storage = (globalThis as Record<symbol, { getStore?: () => { h3Event?: H3EventLike } | undefined } | undefined>)[GLOBAL_EVENT_STORAGE_KEY];
+  return storage?.getStore?.()?.h3Event;
+};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -293,9 +312,10 @@ export const transformPipeableStreamWithRouter = (..._args: unknown[]): never =>
 export const attachRouterServerSsrUtils = (..._args: unknown[]): void => {};
 
 /**
- * Returns `200` — the default HTTP status code.
+ * Get the current response status code.
  *
- * @returns `200`
+ * @remarks Inside {@link createStartTestRuntime}.run(), reads the H3Event's response status.
+ * @returns The status code, or `200` outside a runtime context.
  *
  * @example
  * ```ts
@@ -304,28 +324,39 @@ export const attachRouterServerSsrUtils = (..._args: unknown[]): void => {};
  * expect(getResponseStatus()).toBe(200)
  * ```
  */
-export const getResponseStatus = (): number => 200;
+export const getResponseStatus = (): number => {
+  const event = tryGetH3Event();
+  if (event) return event.res.status ?? 200;
+  return 200;
+};
 
 /**
- * No-op — sets the response status code. Does nothing in tests.
+ * Set the response status code.
  *
- * @param _code - Ignored.
- * @param _text - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), mutates the H3Event's response status.
+ * @param code - HTTP status code.
+ * @param text - HTTP status text.
  *
  * @example
  * ```ts
  * import { setResponseStatus } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * setResponseStatus(404, 'Not Found') // no-op
+ * setResponseStatus(404, 'Not Found') // no-op outside runtime
  * ```
  */
-export const setResponseStatus = (_code?: number, _text?: string): void => {};
+export const setResponseStatus = (code?: number, text?: string): void => {
+  const event = tryGetH3Event();
+  if (!event) return;
+  if (code !== undefined) event.res.status = code;
+  if (text !== undefined) event.res.statusText = text;
+};
 
 /**
- * Returns a localhost URL — no real request context in tests.
+ * Get the full incoming request URL.
  *
- * @param _opts - Ignored.
- * @returns `new URL('http://localhost/')`
+ * @remarks Inside {@link createStartTestRuntime}.run(), reads from the H3Event's request.
+ * @param _opts - Forwarding options (unused in shim).
+ * @returns The request URL, or `http://localhost/` outside a runtime context.
  *
  * @example
  * ```ts
@@ -334,12 +365,17 @@ export const setResponseStatus = (_code?: number, _text?: string): void => {};
  * expect(getRequestUrl().href).toBe('http://localhost/')
  * ```
  */
-export const getRequestUrl = (_opts?: { xForwardedFor?: boolean }): URL => new URL('http://localhost/');
+export const getRequestUrl = (_opts?: { xForwardedHost?: boolean; xForwardedProto?: boolean }): URL => {
+  const event = tryGetH3Event();
+  if (event) return new URL(event.req.url);
+  return new URL('http://localhost/');
+};
 
 /**
- * Returns a minimal `Request` pointing at localhost.
+ * Get the incoming request object.
  *
- * @returns `new Request('http://localhost/')`
+ * @remarks Inside {@link createStartTestRuntime}.run(), returns the H3Event's request.
+ * @returns The `Request`, or a minimal localhost request outside a runtime context.
  *
  * @example
  * ```ts
@@ -348,13 +384,18 @@ export const getRequestUrl = (_opts?: { xForwardedFor?: boolean }): URL => new U
  * expect(getRequest().url).toBe('http://localhost/')
  * ```
  */
-export const getRequest = (): Request => new Request('http://localhost/');
+export const getRequest = (): Request => {
+  const event = tryGetH3Event();
+  if (event) return event.req;
+  return new Request('http://localhost/');
+};
 
 /**
- * Returns `undefined` — no request headers available in tests.
+ * Get a single request header by name.
  *
- * @param _name - Ignored.
- * @returns `undefined`
+ * @remarks Inside {@link createStartTestRuntime}.run(), reads from the H3Event's request headers.
+ * @param name - The header name.
+ * @returns The header value, or `undefined`.
  *
  * @example
  * ```ts
@@ -363,12 +404,17 @@ export const getRequest = (): Request => new Request('http://localhost/');
  * expect(getRequestHeader('content-type')).toBeUndefined()
  * ```
  */
-export const getRequestHeader = (_name: string): string | undefined => undefined;
+export const getRequestHeader = (name: string): string | undefined => {
+  const event = tryGetH3Event();
+  if (event) return event.req.headers.get(name) ?? undefined;
+  return undefined;
+};
 
 /**
- * Returns an empty object — no request headers available in tests.
+ * Get all request headers.
  *
- * @returns `{}`
+ * @remarks Inside {@link createStartTestRuntime}.run(), returns the H3Event's request headers as a record.
+ * @returns A record of header name-value pairs, or `{}` outside a runtime context.
  *
  * @example
  * ```ts
@@ -377,13 +423,17 @@ export const getRequestHeader = (_name: string): string | undefined => undefined
  * expect(getRequestHeaders()).toEqual({})
  * ```
  */
-export const getRequestHeaders = (): Record<string, string | undefined> => ({});
+export const getRequestHeaders = (): Record<string, string | undefined> => {
+  const event = tryGetH3Event();
+  if (event) return Object.fromEntries(event.req.headers);
+  return {};
+};
 
 /**
- * Returns `undefined` — no client IP available in tests.
+ * Get the client IP address.
  *
- * @param _opts - Ignored.
- * @returns `undefined`
+ * @param _opts - Forwarding options (unused — IP requires server socket info).
+ * @returns Always `undefined`.
  *
  * @example
  * ```ts
@@ -395,10 +445,11 @@ export const getRequestHeaders = (): Record<string, string | undefined> => ({});
 export const getRequestIP = (_opts?: { xForwardedFor?: boolean }): string | undefined => undefined;
 
 /**
- * Returns `'localhost'`.
+ * Get the request hostname.
  *
- * @param _opts - Ignored.
- * @returns `'localhost'`
+ * @remarks Inside {@link createStartTestRuntime}.run(), reads from the H3Event's Host header.
+ * @param _opts - Forwarding options (unused in shim).
+ * @returns The hostname, or `'localhost'` outside a runtime context.
  *
  * @example
  * ```ts
@@ -407,13 +458,18 @@ export const getRequestIP = (_opts?: { xForwardedFor?: boolean }): string | unde
  * expect(getRequestHost()).toBe('localhost')
  * ```
  */
-export const getRequestHost = (_opts?: { xForwardedFor?: boolean }): string => 'localhost';
+export const getRequestHost = (_opts?: { xForwardedHost?: boolean }): string => {
+  const event = tryGetH3Event();
+  if (event) return event.req.headers.get('host') ?? 'localhost';
+  return 'localhost';
+};
 
 /**
- * Returns `'http'`.
+ * Get the request protocol.
  *
- * @param _opts - Ignored.
- * @returns `'http'`
+ * @remarks Inside {@link createStartTestRuntime}.run(), derives protocol from the request URL.
+ * @param _opts - Forwarding options (unused in shim).
+ * @returns `'http'` or `'https'`, defaulting to `'http'` outside a runtime context.
  *
  * @example
  * ```ts
@@ -422,27 +478,17 @@ export const getRequestHost = (_opts?: { xForwardedFor?: boolean }): string => '
  * expect(getRequestProtocol()).toBe('http')
  * ```
  */
-export const getRequestProtocol = (_opts?: { xForwardedFor?: boolean }): string => 'http';
+export const getRequestProtocol = (_opts?: { xForwardedProto?: boolean }): string => {
+  const event = tryGetH3Event();
+  if (event) return new URL(event.req.url).protocol.replace(':', '');
+  return 'http';
+};
 
 /**
- * Returns `undefined` — no cookies available in tests.
+ * Get all cookies from the incoming request.
  *
- * @param _name - Ignored.
- * @returns `undefined`
- *
- * @example
- * ```ts
- * import { getCookie } from '@tanstack-router-testing/react-start-testing/server-shim'
- *
- * expect(getCookie('session')).toBeUndefined()
- * ```
- */
-export const getCookie = (_name: string): string | undefined => undefined;
-
-/**
- * Returns an empty object — no cookies available in tests.
- *
- * @returns `{}`
+ * @remarks Inside {@link createStartTestRuntime}.run(), parses the Cookie header from the H3Event's request.
+ * @returns A record of cookie name-value pairs, or `{}` outside a runtime context.
  *
  * @example
  * ```ts
@@ -451,43 +497,77 @@ export const getCookie = (_name: string): string | undefined => undefined;
  * expect(getCookies()).toEqual({})
  * ```
  */
-export const getCookies = (): Record<string, string> => ({});
+export const getCookies = (): Record<string, string> => {
+  const event = tryGetH3Event();
+  if (!event) return {};
+  const parsed = parseCookieHeader(event.req.headers.get('cookie') ?? '');
+  const result: Record<string, string> = {};
+  for (const [name, value] of Object.entries(parsed)) {
+    if (value !== undefined) result[name] = value;
+  }
+  return result;
+};
 
 /**
- * No-op — sets a cookie. Does nothing in tests.
+ * Get a single cookie value by name from the incoming request.
  *
- * @param _name - Ignored.
- * @param _value - Ignored.
- * @param _options - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), parses the Cookie header from the H3Event's request.
+ * @param name - The cookie name.
+ * @returns The cookie value, or `undefined`.
+ *
+ * @example
+ * ```ts
+ * import { getCookie } from '@tanstack-router-testing/react-start-testing/server-shim'
+ *
+ * expect(getCookie('session')).toBeUndefined()
+ * ```
+ */
+export const getCookie = (name: string): string | undefined => getCookies()[name];
+
+/**
+ * Set a cookie on the response.
+ *
+ * @remarks Inside {@link createStartTestRuntime}.run(), appends a Set-Cookie header to the H3Event's response.
+ * @param name - Cookie name.
+ * @param value - Cookie value.
+ * @param options - Serialization options from `cookie-es`.
  *
  * @example
  * ```ts
  * import { setCookie } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * setCookie('session', 'abc123') // no-op
+ * setCookie('session', 'abc123') // no-op outside runtime
  * ```
  */
-export const setCookie = (_name: string, _value: string, _options?: Record<string, unknown>): void => {};
+export const setCookie = (name: string, value: string, options?: CookieSerializeOptions): void => {
+  const event = tryGetH3Event();
+  if (!event) return;
+  event.res.headers.append('set-cookie', serializeCookie(name, value, options));
+};
 
 /**
- * No-op — deletes a cookie. Does nothing in tests.
+ * Delete a cookie by setting it to expire immediately.
  *
- * @param _name - Ignored.
- * @param _options - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), appends a Set-Cookie header with `maxAge: 0`.
+ * @param name - Cookie name.
+ * @param options - Serialization options from `cookie-es`.
  *
  * @example
  * ```ts
  * import { deleteCookie } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * deleteCookie('session') // no-op
+ * deleteCookie('session') // no-op outside runtime
  * ```
  */
-export const deleteCookie = (_name: string, _options?: Record<string, unknown>): void => {};
+export const deleteCookie = (name: string, options?: CookieSerializeOptions): void => {
+  setCookie(name, '', { ...options, maxAge: 0 });
+};
 
 /**
- * Returns a default response shape with status 200.
+ * Get the full response object (status, headers, errHeaders).
  *
- * @returns `{ status: 200, statusText: 'OK', headers: new Headers(), errHeaders: new Headers() }`
+ * @remarks Inside {@link createStartTestRuntime}.run(), returns the H3Event's response state.
+ * @returns The response shape, or a default `{ status: 200, statusText: 'OK', ... }` outside a runtime context.
  *
  * @example
  * ```ts
@@ -496,18 +576,25 @@ export const deleteCookie = (_name: string, _options?: Record<string, unknown>):
  * expect(getResponse().status).toBe(200)
  * ```
  */
-export const getResponse = (): { status: number; statusText: string; headers: Headers; errHeaders: Headers } => ({
-  status: 200,
-  statusText: 'OK',
-  headers: new Headers(),
-  errHeaders: new Headers(),
-});
+export const getResponse = (): { status: number; statusText: string; headers: Headers; errHeaders: Headers } => {
+  const event = tryGetH3Event();
+  if (event) {
+    return {
+      status: event.res.status ?? 200,
+      statusText: event.res.statusText ?? 'OK',
+      headers: event.res.headers,
+      errHeaders: event.res.errHeaders,
+    };
+  }
+  return { status: 200, statusText: 'OK', headers: new Headers(), errHeaders: new Headers() };
+};
 
 /**
- * Returns `undefined` — no response headers set in tests.
+ * Get a single response header by name.
  *
- * @param _name - Ignored.
- * @returns `undefined`
+ * @remarks Inside {@link createStartTestRuntime}.run(), reads from the H3Event's response headers.
+ * @param name - The header name.
+ * @returns The header value, or `undefined`.
  *
  * @example
  * ```ts
@@ -516,12 +603,17 @@ export const getResponse = (): { status: number; statusText: string; headers: He
  * expect(getResponseHeader('x-custom')).toBeUndefined()
  * ```
  */
-export const getResponseHeader = (_name: string): string | undefined => undefined;
+export const getResponseHeader = (name: string): string | undefined => {
+  const event = tryGetH3Event();
+  if (event) return event.res.headers.get(name) ?? undefined;
+  return undefined;
+};
 
 /**
- * Returns an empty object — no response headers set in tests.
+ * Get all response headers.
  *
- * @returns `{}`
+ * @remarks Inside {@link createStartTestRuntime}.run(), returns the H3Event's response headers as a record.
+ * @returns A record of header name-value pairs, or `{}` outside a runtime context.
  *
  * @example
  * ```ts
@@ -530,64 +622,98 @@ export const getResponseHeader = (_name: string): string | undefined => undefine
  * expect(getResponseHeaders()).toEqual({})
  * ```
  */
-export const getResponseHeaders = (): Record<string, string | undefined> => ({});
+export const getResponseHeaders = (): Record<string, string | undefined> => {
+  const event = tryGetH3Event();
+  if (event) return Object.fromEntries(event.res.headers);
+  return {};
+};
 
 /**
- * No-op — sets a response header. Does nothing in tests.
+ * Set a response header.
  *
- * @param _name - Ignored.
- * @param _value - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), mutates the H3Event's response headers.
+ * @param name - Header name.
+ * @param value - Header value or array of values.
  *
  * @example
  * ```ts
  * import { setResponseHeader } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * setResponseHeader('x-custom', 'value') // no-op
+ * setResponseHeader('x-custom', 'value') // no-op outside runtime
  * ```
  */
-export const setResponseHeader = (_name: string, _value: string | string[]): void => {};
+export const setResponseHeader = (name: string, value: string | string[]): void => {
+  const event = tryGetH3Event();
+  if (!event) return;
+  if (Array.isArray(value)) {
+    event.res.headers.delete(name);
+    for (const v of value) event.res.headers.append(name, v);
+  } else {
+    event.res.headers.set(name, value);
+  }
+};
 
 /**
- * No-op — sets multiple response headers. Does nothing in tests.
+ * Set multiple response headers.
  *
- * @param _headers - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), mutates the H3Event's response headers.
+ * @param headers - Record of header name-value pairs.
  *
  * @example
  * ```ts
  * import { setResponseHeaders } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * setResponseHeaders({ 'x-custom': 'value' }) // no-op
+ * setResponseHeaders({ 'x-custom': 'value' }) // no-op outside runtime
  * ```
  */
-export const setResponseHeaders = (_headers: Record<string, string | string[] | undefined>): void => {};
+export const setResponseHeaders = (headers: Record<string, string | string[] | undefined>): void => {
+  const event = tryGetH3Event();
+  if (!event) return;
+  for (const [name, value] of Object.entries(headers)) {
+    if (value !== undefined) setResponseHeader(name, value);
+  }
+};
 
 /**
- * No-op — removes a response header. Does nothing in tests.
+ * Remove a response header.
  *
- * @param _name - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), deletes from the H3Event's response headers.
+ * @param name - Header name to remove.
  *
  * @example
  * ```ts
  * import { removeResponseHeader } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * removeResponseHeader('x-custom') // no-op
+ * removeResponseHeader('x-custom') // no-op outside runtime
  * ```
  */
-export const removeResponseHeader = (_name: string): void => {};
+export const removeResponseHeader = (name: string): void => {
+  const event = tryGetH3Event();
+  if (event) event.res.headers.delete(name);
+};
 
 /**
- * No-op — clears response headers. Does nothing in tests.
+ * Clear response headers.
  *
- * @param _headerNames - Ignored.
+ * @remarks Inside {@link createStartTestRuntime}.run(), clears the H3Event's response headers.
+ * @param headerNames - Specific headers to clear; omit to clear all.
  *
  * @example
  * ```ts
  * import { clearResponseHeaders } from '@tanstack-router-testing/react-start-testing/server-shim'
  *
- * clearResponseHeaders() // no-op
+ * clearResponseHeaders() // no-op outside runtime
  * ```
  */
-export const clearResponseHeaders = (_headerNames?: string[]): void => {};
+export const clearResponseHeaders = (headerNames?: string[]): void => {
+  const event = tryGetH3Event();
+  if (!event) return;
+  if (headerNames && headerNames.length > 0) {
+    for (const name of headerNames) event.res.headers.delete(name);
+  } else {
+    for (const name of event.res.headers.keys()) event.res.headers.delete(name);
+  }
+};
 
 /**
  * Returns `undefined` — no request context available for query validation in tests.
