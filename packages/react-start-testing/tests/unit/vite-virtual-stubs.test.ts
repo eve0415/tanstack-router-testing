@@ -1,5 +1,5 @@
 // @vitest-environment node
-import type { Plugin, UserConfig } from 'vite';
+import type { Plugin } from 'vite';
 
 import { describe, expect, it } from 'vitest';
 
@@ -19,33 +19,39 @@ const VIRTUAL_MODULE_IDS = [
 const getPlugin = (name: string): Plugin | undefined => tanstackStartTesting().find(p => p.name === name);
 
 describe('tanstack-start-testing:virtual-stubs plugin', () => {
-  it('returns alias entries for all known virtual module IDs', () => {
+  it('has enforce: pre to run before vite:import-analysis', () => {
+    const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
+    expect(plugin?.enforce).toBe('pre');
+  });
+
+  it('resolves known virtual module IDs to null-byte prefixed IDs', () => {
     const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
     expect(plugin).toBeDefined();
-    const configHook = plugin?.config as Function;
-    const config = configHook.call({}) as UserConfig;
-    const aliases = config.resolve?.alias;
-    expect(aliases).toBeDefined();
-    expect(Array.isArray(aliases)).toBeTruthy();
+    const resolveId = plugin?.resolveId as Function;
 
     for (const id of VIRTUAL_MODULE_IDS) {
-      expect(aliases).toContainEqual({ find: id, replacement: `\0${id}` });
+      expect(resolveId.call({}, id)).toBe(`\0${id}`);
     }
   });
 
-  it('does not include unrelated aliases', () => {
-    const plugin = getPlugin('tanstack-start-testing:virtual-stubs');
-    expect(plugin).toBeDefined();
-    const configHook = plugin?.config as Function;
-    const config = configHook.call({}) as UserConfig;
-    const aliases = config.resolve?.alias as { find: string; replacement: string }[];
-    expect(aliases).toHaveLength(VIRTUAL_MODULE_IDS.length);
+  it('returns undefined for unknown module IDs', () => {
+    const resolveId = getPlugin('tanstack-start-testing:virtual-stubs')?.resolveId as Function;
+    expect(resolveId.call({}, 'some-other-module')).toBeUndefined();
+    expect(resolveId.call({}, '@tanstack/react-router')).toBeUndefined();
   });
 
   it('loads empty stub content for null-byte prefixed IDs', () => {
     const load = getPlugin('tanstack-start-testing:virtual-stubs')?.load as Function;
     for (const id of VIRTUAL_MODULE_IDS) {
-      expect(load.call({}, `\0${id}`)).toBeDefined();
+      const result = load.call({}, `\0${id}`) as string;
+      expect(result).toBeDefined();
+      expect(result).toContain('export');
     }
+  });
+
+  it('does not load content for non-virtual IDs', () => {
+    const load = getPlugin('tanstack-start-testing:virtual-stubs')?.load as Function;
+    expect(load.call({}, 'some-other-module')).toBeUndefined();
+    expect(load.call({}, '\0some-other-module')).toBeUndefined();
   });
 });

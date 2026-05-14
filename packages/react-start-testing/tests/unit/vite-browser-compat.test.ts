@@ -18,20 +18,32 @@ describe('tanstack-start-testing:browser-compat plugin', () => {
     expect(resolveId.call(clientCtx, '@tanstack/start-storage-context')).toBe('\0tanstack-start-storage-context-browser-stub');
   });
 
-  it('does not intercept @tanstack/start-storage-context in non-client environments', () => {
+  it('resolves in non-standard browser environments like __vitest_browser__ and preview', () => {
     const resolveId = getPlugin('tanstack-start-testing:browser-compat')?.resolveId as Function;
-    const ssrCtx = { environment: { name: 'ssr' } };
-    expect(resolveId.call(ssrCtx, '@tanstack/start-storage-context')).toBeUndefined();
+
+    for (const name of ['__vitest_browser__', 'preview', 'browser', 'custom-env']) {
+      const ctx = { environment: { name } };
+      expect(resolveId.call(ctx, '@tanstack/start-storage-context')).toBe('\0tanstack-start-storage-context-browser-stub');
+    }
   });
 
-  it('excludes packages with #tanstack-* imports from client pre-bundling', () => {
+  it('does not intercept in server-side environments (ssr, server, node)', () => {
+    const resolveId = getPlugin('tanstack-start-testing:browser-compat')?.resolveId as Function;
+
+    for (const name of ['ssr', 'server', 'node']) {
+      const ctx = { environment: { name } };
+      expect(resolveId.call(ctx, '@tanstack/start-storage-context')).toBeUndefined();
+    }
+  });
+
+  it('excludes packages from pre-bundling at the top level', () => {
     const plugin = getPlugin('tanstack-start-testing:browser-compat');
     expect(plugin).toBeDefined();
     const configHook = plugin?.config as Function;
-    const config = configHook.call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
-    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-storage-context');
-    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-server-core');
-    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/start-client-core');
+    const config = configHook.call({}) as { optimizeDeps: { exclude: string[] } };
+    expect(config.optimizeDeps.exclude).toContain('@tanstack/start-storage-context');
+    expect(config.optimizeDeps.exclude).toContain('@tanstack/start-server-core');
+    expect(config.optimizeDeps.exclude).toContain('@tanstack/start-client-core');
   });
 
   it('loads a browser-safe stub module', () => {
@@ -44,12 +56,12 @@ describe('tanstack-start-testing:browser-compat plugin', () => {
 });
 
 describe('@tanstack/react-start/testing-rsc-runtime plugin', () => {
-  it('excludes @tanstack/react-start-rsc from client pre-bundling', () => {
+  it('excludes @tanstack/react-start-rsc from pre-bundling at the top level', () => {
     const plugin = getRscPlugin('@tanstack/react-start/testing-rsc-runtime');
     expect(plugin).toBeDefined();
     const configHook = plugin?.config as Function;
-    const config = configHook.call({}) as { environments: { client: { optimizeDeps: { exclude: string[] } } } };
-    expect(config.environments.client.optimizeDeps.exclude).toContain('@tanstack/react-start-rsc');
+    const config = configHook.call({}) as { optimizeDeps: { exclude: string[] } };
+    expect(config.optimizeDeps.exclude).toContain('@tanstack/react-start-rsc');
   });
 
   it('is not included when rsc option is false', () => {
