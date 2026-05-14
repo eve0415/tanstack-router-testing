@@ -87,6 +87,10 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
                       find: /^@tanstack\/react-start$/,
                       replacement: '@tanstack-router-testing/react-start-testing/shim',
                     },
+                    {
+                      find: /^@tanstack\/react-start\/server$/,
+                      replacement: '@tanstack-router-testing/react-start-testing/server-shim',
+                    },
                   ],
                 },
               }
@@ -109,22 +113,20 @@ const STORAGE_CONTEXT_STUB_CODE = 'export function getStartContext() { return un
  * @returns A Vite plugin that intercepts the import in client environments and
  *   serves a no-op module with matching exports.
  */
+const NON_BROWSER_ENVS = new Set(['ssr', 'server', 'node']);
+
 const tanstackStartBrowserCompat = (): Plugin => ({
   name: 'tanstack-start-testing:browser-compat',
   enforce: 'pre',
   config() {
     return {
-      environments: {
-        client: {
-          optimizeDeps: {
-            exclude: ['@tanstack/start-storage-context', '@tanstack/start-server-core', '@tanstack/start-client-core'],
-          },
-        },
+      optimizeDeps: {
+        exclude: ['@tanstack/start-storage-context', '@tanstack/start-server-core', '@tanstack/start-client-core'],
       },
     };
   },
   resolveId(id) {
-    return this.environment.name === 'client' && id === '@tanstack/start-storage-context' ? STORAGE_CONTEXT_STUB_ID : undefined;
+    return !NON_BROWSER_ENVS.has(this.environment.name) && id === '@tanstack/start-storage-context' ? STORAGE_CONTEXT_STUB_ID : undefined;
   },
   load(id) {
     if (id !== STORAGE_CONTEXT_STUB_ID) return;
@@ -152,15 +154,9 @@ const VIRTUAL_MODULE_IDS = new Set([
  */
 const tanstackStartVirtualStubs = (): Plugin => ({
   name: 'tanstack-start-testing:virtual-stubs',
-  config() {
-    return {
-      resolve: {
-        alias: [...VIRTUAL_MODULE_IDS].map(id => ({
-          find: id,
-          replacement: `\0${id}`,
-        })),
-      },
-    };
+  enforce: 'pre',
+  resolveId(id) {
+    return VIRTUAL_MODULE_IDS.has(id) ? `\0${id}` : undefined;
   },
   load(id) {
     return id.startsWith('\0') && VIRTUAL_MODULE_IDS.has(id.slice(1)) ? 'export default {}; export {};' : undefined;
@@ -174,12 +170,8 @@ const tanstackStartRscTestingRuntime = (): Plugin => ({
   name: '@tanstack/react-start/testing-rsc-runtime',
   config() {
     return {
-      environments: {
-        client: {
-          optimizeDeps: {
-            exclude: ['@tanstack/react-start-rsc'],
-          },
-        },
+      optimizeDeps: {
+        exclude: ['@tanstack/react-start-rsc'],
       },
     };
   },
