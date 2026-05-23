@@ -1,6 +1,6 @@
 {
   "name": "@tanstack-router-testing/react-router-testing",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Upstream-shaped test helpers for @tanstack/react-router: createTestRouter and createRouterHarness.",
   "keywords": [
     "react",
@@ -21,7 +21,9 @@
     "!**/*.tsbuildinfo"
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/cleanup.mjs"
+  ],
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
@@ -32,6 +34,10 @@
     "./ssr": {
       "types": "./dist/ssr.d.mts",
       "import": "./dist/ssr.mjs"
+    },
+    "./cleanup": {
+      "types": "./dist/cleanup.d.mts",
+      "import": "./dist/cleanup.mjs"
     }
   },
   "publishConfig": {
@@ -63,10 +69,14 @@
     "@tanstack/react-router": "^1.168.0",
     "@tanstack/router-core": "^1.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "vitest": "^3.0.0 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "vitest": {
       "optional": true
     }
   }
