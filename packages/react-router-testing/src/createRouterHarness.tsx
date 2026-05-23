@@ -9,6 +9,32 @@ import { RouterProvider } from '@tanstack/react-router';
 import { createTestRouter } from './createTestRouter.ts';
 import { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
 
+const activeHarnesses = new Set<RouterHarness<AnyRouter>>();
+
+/**
+ * Remove and clean up all active router harnesses.
+ *
+ * @remarks Intended for use in Vitest setup files via `afterEach`.
+ * Import `@tanstack-router-testing/react-router-testing/cleanup` instead
+ * of calling this directly — it wires up the `afterEach` hook for you.
+ *
+ * @example
+ * ```ts
+ * import { afterEach } from 'vitest';
+ * import { cleanupAllHarnesses } from '@tanstack-router-testing/react-router-testing';
+ *
+ * afterEach(() => {
+ *   cleanupAllHarnesses();
+ * });
+ * ```
+ */
+export const cleanupAllHarnesses = (): void => {
+  for (const harness of activeHarnesses) {
+    harness.cleanup();
+  }
+  activeHarnesses.clear();
+};
+
 let _QueryClientProvider: ComponentType<{ client: object; children: ReactElement }> | undefined;
 const resolveQueryClientProvider = async (): Promise<void> => {
   if (_QueryClientProvider) return;
@@ -460,10 +486,23 @@ export function createRouterHarness<
 ): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createRouterHarness(options: any): RouterHarness<any> {
-  if (isFileRouteOptions(options)) {
-    return createFileRouteHarness(options as FileRouteHarnessOptions);
-  }
-  return createTreeRouteHarness(options as Record<string, unknown>);
+  const harness = isFileRouteOptions(options)
+    ? createFileRouteHarness(options as FileRouteHarnessOptions)
+    : createTreeRouteHarness(options as Record<string, unknown>);
+
+  const originalCleanup = harness.cleanup;
+  let cleanedUp = false;
+  const tracked: RouterHarness<AnyRouter> = {
+    ...harness,
+    cleanup: () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      activeHarnesses.delete(tracked);
+      originalCleanup();
+    },
+  };
+  activeHarnesses.add(tracked);
+  return tracked;
 }
 
 const createTreeRouteHarness = (options: Record<string, unknown>): RouterHarness<AnyRouter> => {
