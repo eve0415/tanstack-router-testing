@@ -272,6 +272,9 @@ importers:
 
   packages/react-start-testing:
     dependencies:
+      '@tanstack-router-testing/react-router-testing':
+        specifier: workspace:^
+        version: link:../react-router-testing
       '@tanstack-router-testing/router-testing-core':
         specifier: workspace:*
         version: link:../router-testing-core

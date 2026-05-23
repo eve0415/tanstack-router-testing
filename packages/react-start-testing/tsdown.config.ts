@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/browser.ts', 'src/shim.ts', 'src/server-shim.ts', 'src/vite.ts'],
+  entry: ['src/index.ts', 'src/browser.ts', 'src/shim.ts', 'src/server-shim.ts', 'src/vite.ts', 'src/cleanup.ts'],
   format: ['esm'],
   dts: true,
   clean: true,
@@ -27,6 +27,9 @@ export default defineConfig({
       'react-dom/client',
       'react-dom/server',
       'react/jsx-runtime',
+      'vitest',
+      '@tanstack-router-testing/react-router-testing',
+      '@tanstack-router-testing/react-router-testing/cleanup',
     ],
   },
 });
