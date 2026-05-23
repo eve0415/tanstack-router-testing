@@ -43,28 +43,25 @@
     "test:unit": "node ../../scripts/gen-vendor-smoke-tests.mjs && vitest run --passWithNoTests",
     "test:types": "tsgo --noEmit"
   },
-  "dependencies": {
-    "@tanstack/history": "1.162.0",
-    "@tanstack/router-core": "1.171.5"
-  },
   "devDependencies": {
     "@tanstack-router-testing/react-start-testing": "workspace:*",
     "@tanstack-router-testing/router-testing-core": "workspace:*",
-    "@tanstack/react-query": "^5.100.11",
-    "@tanstack/react-router": "^1.170.7",
-    "@testing-library/react": "16.3.2",
-    "@types/react": "19.2.15",
-    "@types/react-dom": "19.2.3",
-    "@typescript/native-preview": "7.0.0-dev.20260522.1",
-    "jsdom": "29.1.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "tsdown": "0.22.0",
-    "vitest": "4.1.7"
+    "@tanstack/history": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/router-core": "catalog:",
+    "@testing-library/react": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
+    "@tanstack/history": "^1.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-router": "^1.168.0",
+    "@tanstack/router-core": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

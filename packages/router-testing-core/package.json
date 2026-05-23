@@ -38,13 +38,14 @@
     "test:unit": "vitest run --passWithNoTests",
     "test:types": "tsgo --noEmit"
   },
-  "dependencies": {
-    "@tanstack/history": "1.162.0",
-    "@tanstack/router-core": "1.171.5"
-  },
   "devDependencies": {
-    "@typescript/native-preview": "7.0.0-dev.20260522.1",
-    "tsdown": "0.22.0",
-    "vitest": "4.1.7"
+    "@tanstack/history": "catalog:",
+    "@tanstack/router-core": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/history": "^1.0.0",
+    "@tanstack/router-core": "^1.0.0"
   }
 }
