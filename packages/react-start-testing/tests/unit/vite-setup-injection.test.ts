@@ -29,10 +29,12 @@ describe('tanstackStartTesting vite plugin', () => {
     expect(config?.resolve?.alias).toBeDefined();
   });
 
-  it('omits alias but still injects setupFiles when aliasReactStart is false', () => {
-    const config = getTestPluginConfig(tanstackStartTesting({ aliasReactStart: false }));
-    expect(config?.resolve).toBeUndefined();
-    expect(config?.test?.setupFiles).toContain('src/routeTree.gen.ts');
+  it('returns only router plugins when aliasReactStart is false', () => {
+    const plugins = tanstackStartTesting({ aliasReactStart: false });
+    const pluginNames = plugins.map(p => p.name);
+    expect(pluginNames).not.toContain('@tanstack/react-start/testing');
+    expect(pluginNames).not.toContain('tanstack-start-testing:browser-compat');
+    expect(pluginNames).not.toContain('tanstack-start-testing:virtual-stubs');
   });
 
   it('omits setupFiles when browser mode is enabled', () => {

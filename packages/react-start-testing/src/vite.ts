@@ -68,8 +68,14 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
     target: 'react' as const,
   };
   const routerPlugins = tanstackRouter(routerPluginOptions);
-  const plugins: Plugin[] = [
-    ...(Array.isArray(routerPlugins) ? routerPlugins : [routerPlugins]),
+  const basePlugins = Array.isArray(routerPlugins) ? routerPlugins : [routerPlugins];
+
+  if (options.aliasReactStart === false) {
+    return basePlugins;
+  }
+
+  return [
+    ...basePlugins,
     tanstackStartBrowserCompat(),
     tanstackStartVirtualStubs(),
     ...(options.rsc === true ? [tanstackStartRscTestingRuntime()] : []),
@@ -79,28 +85,23 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
         const genPath = routerPluginOptions.generatedRouteTree;
         const isBrowser = config.test?.browser?.enabled === true;
         return {
-          ...(options.aliasReactStart !== false
-            ? {
-                resolve: {
-                  alias: [
-                    {
-                      find: /^@tanstack\/react-start$/,
-                      replacement: '@tanstack-router-testing/react-start-testing/shim',
-                    },
-                    {
-                      find: /^@tanstack\/react-start\/server$/,
-                      replacement: '@tanstack-router-testing/react-start-testing/server-shim',
-                    },
-                  ],
-                },
-              }
-            : {}),
+          resolve: {
+            alias: [
+              {
+                find: /^@tanstack\/react-start$/,
+                replacement: '@tanstack-router-testing/react-start-testing/shim',
+              },
+              {
+                find: /^@tanstack\/react-start\/server$/,
+                replacement: '@tanstack-router-testing/react-start-testing/server-shim',
+              },
+            ],
+          },
           ...(!isBrowser ? { test: { setupFiles: [genPath] } } : {}),
         };
       },
     },
   ];
-  return plugins;
 };
 
 const STORAGE_CONTEXT_STUB_ID = '\0tanstack-start-storage-context-browser-stub';

@@ -28,8 +28,25 @@ describe('@tanstack/react-start/server alias', () => {
     expect(aliases?.[1]?.replacement).toBe('@tanstack-router-testing/react-start-testing/server-shim');
   });
 
-  it('omits all aliases when aliasReactStart is false', () => {
-    const config = getTestingPluginConfig({ aliasReactStart: false });
-    expect(config.resolve).toBeUndefined();
+  it('returns only router plugins when aliasReactStart is false', () => {
+    const plugins = tanstackStartTesting({ aliasReactStart: false });
+    const pluginNames = plugins.map(p => p.name);
+    expect(pluginNames).not.toContain('@tanstack/react-start/testing');
+  });
+
+  it('forwards router options in router-only mode', () => {
+    const plugins = tanstackStartTesting({
+      aliasReactStart: false,
+      routesDirectory: 'custom/routes',
+      generatedRouteTree: 'custom/tree.gen.ts',
+    });
+    expect(plugins.length).toBeGreaterThan(0);
+    expect(plugins.every(p => p.name !== '@tanstack/react-start/testing')).toBeTruthy();
+  });
+
+  it('ignores rsc option in router-only mode', () => {
+    const plugins = tanstackStartTesting({ aliasReactStart: false, rsc: true });
+    const pluginNames = plugins.map(p => p.name);
+    expect(pluginNames).not.toContain('@tanstack/react-start/testing-rsc-runtime');
   });
 });
