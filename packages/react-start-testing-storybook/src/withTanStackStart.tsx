@@ -63,35 +63,34 @@ export interface TanStackStartStoryParameters<TRouteTree extends AnyRoute = AnyR
  * };
  * ```
  */
-export const withTanStackStart = (): Decorator => {
-  const Decorated = (Story: unknown, context: { parameters?: { tanstackStart?: TanStackStartStoryParameters } }): ReactElement => {
-    const params = context.parameters?.tanstackStart;
-    if (!params) {
-      throw new Error(
-        '[tanstack-router-testing-storybook] withTanStackStart: parameters.tanstackStart is required. Provide at least { routeTree } on the story.',
-      );
-    }
-    const router = useMemo(
-      () =>
-        createTestRouter({
-          routeTree: params.routeTree,
-          ...(params.initialEntries !== undefined ? { initialEntries: params.initialEntries } : {}),
-          ...(params.context !== undefined ? { context: params.context } : { context: {} }),
-        }),
-      [params.routeTree, params.initialEntries, params.context],
+const Decorated = (Story: unknown, context: { parameters?: { tanstackStart?: TanStackStartStoryParameters } }): ReactElement => {
+  const params = context.parameters?.tanstackStart;
+  if (!params) {
+    throw new Error(
+      '[tanstack-router-testing-storybook] withTanStackStart: parameters.tanstackStart is required. Provide at least { routeTree } on the story.',
     );
-    useEffect(() => {
-      const disposers = (params.serverFnMocks ?? []).map(([fn, impl]) => mockServerFn(fn, impl));
-      return () => {
-        for (const dispose of disposers) dispose();
-      };
-    }, [params.serverFnMocks]);
-    const StoryComponent = Story as () => ReactElement;
-    return (
-      <RouterContextProvider router={router}>
-        <StoryComponent />
-      </RouterContextProvider>
-    );
-  };
-  return Decorated as Decorator;
+  }
+  const router = useMemo(
+    () =>
+      createTestRouter({
+        routeTree: params.routeTree,
+        ...(params.initialEntries !== undefined ? { initialEntries: params.initialEntries } : {}),
+        ...(params.context !== undefined ? { context: params.context } : { context: {} }),
+      }),
+    [params.routeTree, params.initialEntries, params.context],
+  );
+  useEffect(() => {
+    const disposers = (params.serverFnMocks ?? []).map(([fn, impl]) => mockServerFn(fn, impl));
+    return () => {
+      for (const dispose of disposers) dispose();
+    };
+  }, [params.serverFnMocks]);
+  const StoryComponent = Story as () => ReactElement;
+  return (
+    <RouterContextProvider router={router}>
+      <StoryComponent />
+    </RouterContextProvider>
+  );
 };
+
+export const withTanStackStart = (): Decorator => Decorated as Decorator;
