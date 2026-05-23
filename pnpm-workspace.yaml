@@ -8,3 +8,14 @@ preferWorkspacePackages: true
 packages:
   - 'packages/*'
   - '!**/node_modules/**'
+sharedWorkspaceLockfile: true
+publicHoistPattern:
+  - '*react*'
+  - '@tanstack/*'
+  - '@testing-library/*'
+allowBuilds:
+  '@clerk/shared': false
+  '@firebase/util': false
+  '@parcel/watcher': false
+  esbuild: false
+  protobufjs: false
