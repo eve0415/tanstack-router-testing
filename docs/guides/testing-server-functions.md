@@ -135,6 +135,67 @@ it('renders orders with mocked server function', async () => {
 });
 ```
 
+## Testing with Custom Request Headers
+
+`createStartTestRuntime` accepts a `request` option that flows through to `getRequestHeaders()`, `getRequestHeader()`, and other H3-backed request utilities inside server functions.
+
+```ts
+import { createStartTestRuntime, clearStartMocks } from '@tanstack-router-testing/react-start-testing';
+import { createServerFn } from '@tanstack/react-start';
+import { getRequestHeaders } from '@tanstack/start-server-core';
+
+const getLocale = createServerFn().handler(async () => {
+  const headers = getRequestHeaders();
+  return headers['accept-language'] ?? 'en';
+});
+
+it('reads accept-language from the request', async () => {
+  const runtime = createStartTestRuntime({
+    request: new Request('http://localhost', {
+      headers: { 'accept-language': 'ja-JP' },
+    }),
+  });
+
+  const locale = await runtime.call(getLocale);
+  expect(locale).toBe('ja-JP');
+
+  runtime.cleanup();
+});
+```
+
+You can also override the request per-call:
+
+```ts
+const runtime = createStartTestRuntime({
+  request: new Request('http://localhost', {
+    headers: { authorization: 'Bearer default-token' },
+  }),
+});
+
+// Override for a specific call
+const result = await runtime.call(
+  protectedFn,
+  { data: { id: '1' } },
+  {
+    request: new Request('http://localhost', {
+      headers: { authorization: 'Bearer admin-token' },
+    }),
+  },
+);
+```
+
+## When to Use What
+
+| Scenario                                               | Approach                                           | Why                                                             |
+| ------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------- |
+| Test server function logic directly                    | Alias only (default plugin config)                 | Handler runs in-process — assert on return values, side effects |
+| Test a component that displays server function results | `mockServerFn`                                     | Stub the return to control what the component receives          |
+| Test request-dependent logic (headers, cookies)        | `createStartTestRuntime({ request })`              | Provides a real H3 event with custom headers                    |
+| Test middleware chains                                 | `mockMiddleware` + `callMiddleware`                | Override specific middleware phases                             |
+| Router-only project (no Start)                         | `tanstackStartTesting({ aliasReactStart: false })` | Only get route-tree codegen, no Start shim                      |
+
+**Rule of thumb:** Use the alias (default) when you want the real handler to run. Use `mockServerFn` when you want to control what a consumer sees.
+
 ## Mocking Server Functions That Throw
 
 Test error paths by having the mock throw.

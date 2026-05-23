@@ -143,9 +143,51 @@ render(
 
 > **Note:** The Vite plugin (`tanstackStartTesting()`) auto-injects `routeTree.gen.ts` as a Vitest setup file, so all routes have their parent/path/id wired up before any test runs. If you're not using the plugin, import `routeTree.gen.ts` at the top of your test file for side effects.
 
+## Automatic Cleanup
+
+Add a setup file to your Vitest config and harnesses are cleaned up automatically after each test — no manual `afterEach` needed.
+
+**TanStack Start projects** (cleans both harnesses and server function mocks):
+
+```ts
+// vitest.config.ts
+export default defineConfig({
+  plugins: [tanstackStartTesting()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['@tanstack-router-testing/react-start-testing/cleanup'],
+  },
+});
+```
+
+**Router-only projects** (cleans harnesses only):
+
+```ts
+// vitest.config.ts
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['@tanstack-router-testing/react-router-testing/cleanup'],
+  },
+});
+```
+
+> **Note:** `react-start-testing/cleanup` includes router cleanup transitively — you don't need both.
+
+With auto-cleanup, tests become simpler:
+
+```tsx
+it('loads the root', async () => {
+  const harness = createRouterHarness({ routeTree });
+  await harness.load();
+  expect(harness.getMatch('/')).toBeDefined();
+  // no cleanup needed — handled by the setup file
+});
+```
+
 ## Common Patterns
 
-Clean up the harness in `afterEach` so history listeners don't leak between tests:
+If you prefer manual cleanup over setup files, clean up the harness in `afterEach` so history listeners don't leak between tests:
 
 ```tsx
 import { afterEach, describe, expect, it } from 'vitest';
