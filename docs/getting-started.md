@@ -174,6 +174,22 @@ export default defineConfig({
 
 > **Note:** `react-start-testing/cleanup` includes router cleanup transitively — you don't need both.
 
+### Lint Rule Compatibility
+
+If your linter enforces `vitest/require-top-level-describe`, the bare `afterEach` in cleanup setup files may trigger a warning. Suppress it for setup files:
+
+```js
+// eslint.config.js (flat config)
+{
+  files: ['vitest.setup.ts', '**/setup/*.ts'],
+  rules: {
+    'vitest/require-top-level-describe': 'off',
+  },
+}
+```
+
+Alternatively, ensure your lint `include`/`exclude` patterns don't cover Vitest setup files — they're not test files and the rule should not apply to them.
+
 With auto-cleanup, tests become simpler:
 
 ```tsx

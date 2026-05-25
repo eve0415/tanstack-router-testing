@@ -163,6 +163,10 @@ it('reads accept-language from the request', async () => {
 });
 ```
 
+> **Note:** Headers are lowercased per the Web API spec. `CF-Connecting-IP`
+> becomes `cf-connecting-ip` in the object returned by `getRequestHeaders()`.
+> Always use lowercase keys when asserting on header values in tests.
+
 You can also override the request per-call:
 
 ```ts
@@ -216,3 +220,4 @@ it('handles server function errors', async () => {
 - **Mock signature matches callable shape** -- The mock receives the same arguments as the public callable (e.g., `{ data }` for validated functions). Internal context fields are normalized automatically.
 - **Forgetting cleanup** -- Mocks persist across tests within the same module. Always call `clearStartMocks()` in `afterEach` or use the disposer.
 - **Async mocks must return promises** -- If the real handler is async, the mock should be async too (or return a Promise) to maintain the same contract.
+- **`server.deps.inline` conflicts** -- If your Vitest config inlines `@tanstack/start-server-core` or `@tanstack/react-start` via `test.server.deps.inline`, the plugin's virtual stubs conflict with the inlined packages. Either set `aliasReactStart: false` or remove these packages from the inline array. The plugin emits a console warning at startup if this conflict is detected.
