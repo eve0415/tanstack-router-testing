@@ -1,6 +1,6 @@
 import { afterEach } from 'vitest';
 
-import { cleanupAllHarnesses } from './createRouterHarness.tsx';
+import { cleanupAllHarnesses } from './harnessRegistry.ts';
 
 afterEach(() => {
   cleanupAllHarnesses();

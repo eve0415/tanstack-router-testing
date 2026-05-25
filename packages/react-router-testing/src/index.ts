@@ -11,7 +11,8 @@
  * a real router instance rather than isolated route-option invocation.
  */
 
-export { cleanupAllHarnesses, createRouterHarness, type FileRouteHarnessOptions, type RouterHarness } from './createRouterHarness.tsx';
+export { cleanupAllHarnesses } from './harnessRegistry.ts';
+export { createRouterHarness, type FileRouteHarnessOptions, type RouterHarness } from './createRouterHarness.tsx';
 export { type CreateTestRouterMemoryOptions, type CreateTestRouterOptions, createTestRouter } from './createTestRouter.ts';
 export { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
 export type { CreateRouterSsrHarnessOptions, HydrateRouterSsrOptions, RouterSsrHarness, RouterSsrMode } from './ssr.tsx';
@@ -19,4 +20,4 @@ export type { CreateRouterSsrHarnessOptions, HydrateRouterSsrOptions, RouterSsrH
 /**
  * Current package version. Bumped at release time.
  */
-export const VERSION = '0.0.0';
+export const VERSION = '0.6.0';
