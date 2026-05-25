@@ -100,6 +100,20 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
           ...(!isBrowser ? { test: { setupFiles: [genPath] } } : {}),
         };
       },
+      configResolved(resolvedConfig: Record<string, unknown> & { test?: { server?: { deps?: { inline?: (string | RegExp)[] } } } }) {
+        const inline = resolvedConfig.test?.server?.deps?.inline;
+        if (!inline || !Array.isArray(inline)) return;
+
+        const conflicts = ['@tanstack/start-server-core', '@tanstack/react-start'];
+        const found = conflicts.filter(pkg => inline.some(entry => (typeof entry === 'string' ? entry === pkg : entry instanceof RegExp && entry.test(pkg))));
+
+        if (found.length > 0) {
+          console.warn(
+            `[tanstack-start-testing] aliasReactStart is incompatible with server.deps.inline containing ${found.join(', ')}. ` +
+              `Set aliasReactStart: false or remove these from server.deps.inline.`,
+          );
+        }
+      },
     },
   ];
 };
