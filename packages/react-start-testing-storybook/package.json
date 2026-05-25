@@ -1,6 +1,6 @@
 {
   "name": "@tanstack-router-testing/react-start-testing-storybook",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Storybook decorator for TanStack Start: wire CSF3 story parameters through createTestRouter + mockServerFn.",
   "keywords": [
     "decorator",
