@@ -7,6 +7,15 @@
  *
  * @module
  */
+
+/**
+ * Identity passthrough matching the real `createServerEntry` signature.
+ *
+ * @param entry - Server entry object with a `fetch` handler.
+ * @returns The same entry, unmodified.
+ */
+export const createServerEntry = <T extends { fetch: (...args: unknown[]) => unknown }>(entry: T): T => entry;
+
 export default {
   fetch: () => new Response(null, { status: 200 }),
 };

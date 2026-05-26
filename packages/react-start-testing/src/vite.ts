@@ -189,6 +189,13 @@ const VIRTUAL_MODULE_IDS = new Set([
  *
  * @returns A Vite plugin that resolves and loads no-op stubs for TanStack
  *   Start's internal virtual modules.
+ *
+ * @example
+ * ```ts
+ * // vitest.config.ts — standalone usage for custom pool setups
+ * import { tanstackStartVirtualStubs } from '@tanstack-router-testing/react-start-testing/vite';
+ * export default defineConfig({ plugins: [tanstackStartVirtualStubs()] });
+ * ```
  */
 export const tanstackStartVirtualStubs = (): Plugin => ({
   name: 'tanstack-start-testing:virtual-stubs',
