@@ -57,6 +57,14 @@ export interface TanstackStartTestingOptions {
  *
  * This keeps route-tree generation on the real TanStack router plugin path
  * while swapping the Start runtime to the in-process testing shim.
+ *
+ * @remarks
+ * **Cloudflare Workers (`@cloudflare/vitest-pool-workers`):**
+ * `cloudflareTest()` sets `server.deps.inline = true`, which bundles
+ * dependencies before workerd receives them. `vi.mock()` cannot intercept
+ * inlined packages or `cloudflare:*` native modules. Extract pure functions
+ * from modules that import these, and mock bindings via direct `env` mutation
+ * instead.
  */
 export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}): Plugin[] => {
   const routerPluginOptions = {
@@ -71,7 +79,7 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
   const basePlugins = Array.isArray(routerPlugins) ? routerPlugins : [routerPlugins];
 
   if (options.aliasReactStart === false) {
-    return basePlugins;
+    return [...basePlugins, tanstackStartBrowserCompat(), tanstackStartVirtualStubs()];
   }
 
   return [
@@ -95,14 +103,29 @@ export const tanstackStartTesting = (options: TanstackStartTestingOptions = {}):
                 find: /^@tanstack\/react-start\/server$/,
                 replacement: '@tanstack-router-testing/react-start-testing/server-shim',
               },
+              {
+                find: /^@tanstack\/react-start\/server-entry$/,
+                replacement: '@tanstack-router-testing/react-start-testing/server-entry-shim',
+              },
             ],
           },
           ...(!isBrowser ? { test: { setupFiles: [genPath] } } : {}),
         };
       },
-      configResolved(resolvedConfig: Record<string, unknown> & { test?: { server?: { deps?: { inline?: (string | RegExp)[] } } } }) {
+      configResolved(resolvedConfig: Record<string, unknown> & { test?: { server?: { deps?: { inline?: boolean | (string | RegExp)[] } } } }) {
         const inline = resolvedConfig.test?.server?.deps?.inline;
-        if (!inline || !Array.isArray(inline)) return;
+        if (inline === undefined || inline === false) return;
+
+        if (inline === true) {
+          console.warn(
+            '[tanstack-start-testing] server.deps.inline is true (likely from cloudflareTest). ' +
+              'aliasReactStart works but vi.mock() cannot intercept inlined packages. ' +
+              'Consider aliasReactStart: false if you need the real Start runtime.',
+          );
+          return;
+        }
+
+        if (!Array.isArray(inline)) return;
 
         const conflicts = ['@tanstack/start-server-core', '@tanstack/react-start'];
         const found = conflicts.filter(pkg => inline.some(entry => (typeof entry === 'string' ? entry === pkg : entry instanceof RegExp && entry.test(pkg))));
@@ -167,7 +190,7 @@ const VIRTUAL_MODULE_IDS = new Set([
  * @returns A Vite plugin that resolves and loads no-op stubs for TanStack
  *   Start's internal virtual modules.
  */
-const tanstackStartVirtualStubs = (): Plugin => ({
+export const tanstackStartVirtualStubs = (): Plugin => ({
   name: 'tanstack-start-testing:virtual-stubs',
   enforce: 'pre',
   resolveId(id) {

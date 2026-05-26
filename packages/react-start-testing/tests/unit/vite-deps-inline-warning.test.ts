@@ -93,6 +93,39 @@ describe('deps.inline conflict detection', () => {
     warnSpy.mockRestore();
   });
 
+  it('warns when server.deps.inline is true (boolean)', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const plugin = getTestingPlugin();
+    const configResolved = plugin.configResolved as Function;
+
+    configResolved.call(
+      {},
+      {
+        test: { server: { deps: { inline: true } } },
+      },
+    );
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('server.deps.inline is true'));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('vi.mock()'));
+    warnSpy.mockRestore();
+  });
+
+  it('does not warn when server.deps.inline is false', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const plugin = getTestingPlugin();
+    const configResolved = plugin.configResolved as Function;
+
+    configResolved.call(
+      {},
+      {
+        test: { server: { deps: { inline: false } } },
+      },
+    );
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
   it('is not present in router-only mode', () => {
     const plugins = tanstackStartTesting({ aliasReactStart: false });
     const plugin = plugins.find((p: Plugin) => p.name === '@tanstack/react-start/testing');

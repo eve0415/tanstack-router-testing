@@ -49,6 +49,11 @@ describe('tanstack-start-testing:virtual-stubs plugin', () => {
     }
   });
 
+  it('is included when aliasReactStart is false', () => {
+    const plugins = tanstackStartTesting({ aliasReactStart: false });
+    expect(plugins.some(p => p.name === 'tanstack-start-testing:virtual-stubs')).toBeTruthy();
+  });
+
   it('does not load content for non-virtual IDs', () => {
     const load = getPlugin('tanstack-start-testing:virtual-stubs')?.load as Function;
     expect(load.call({}, 'some-other-module')).toBeUndefined();

@@ -44,6 +44,10 @@
       "types": "./dist/server-shim.d.mts",
       "import": "./dist/server-shim.mjs"
     },
+    "./server-entry-shim": {
+      "types": "./dist/server-entry-shim.d.mts",
+      "import": "./dist/server-entry-shim.mjs"
+    },
     "./vite": {
       "types": "./dist/vite.d.mts",
       "import": "./dist/vite.mjs"
