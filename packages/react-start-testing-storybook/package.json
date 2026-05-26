@@ -45,9 +45,9 @@
   },
   "devDependencies": {
     "@storybook/react": "10.4.1",
-    "@tanstack/react-router": "catalog:",
-    "@tanstack/react-start": "catalog:",
-    "@tanstack/router-core": "catalog:",
+    "@tanstack/react-router": "^1.170.8",
+    "@tanstack/react-start": "^1.168.13",
+    "@tanstack/router-core": "^1.171.6",
     "@testing-library/react": "catalog:",
     "jsdom": "catalog:",
     "react": "catalog:",
