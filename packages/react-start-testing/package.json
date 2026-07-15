@@ -89,8 +89,8 @@
   },
   "peerDependencies": {
     "@tanstack-router-testing/react-router-testing": "workspace:^",
-    "@tanstack/react-router": "^1.168.0",
-    "@tanstack/react-start": "^1.167.0",
+    "@tanstack/react-router": "^1.170.0",
+    "@tanstack/react-start": "^1.168.0",
     "@tanstack/router-plugin": "^1.0.0",
     "@tanstack/start-client-core": "^1.0.0",
     "@tanstack/start-fn-stubs": "^1.0.0",
