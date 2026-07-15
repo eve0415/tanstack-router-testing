@@ -562,7 +562,7 @@ Facade returned by `createRouterHarness` for testing routes, loaders, guards, re
 interface RouteOverride {
   readonly loader?: (...args: never[]) => unknown;
   readonly beforeLoad?: (...args: never[]) => unknown;
-  readonly context?: Record<string, unknown> | ((...args: never[]) => unknown);
+  readonly context?: (...args: never[]) => unknown;
   readonly validateSearch?: (input: Record<string, unknown>) => unknown;
   readonly loaderDeps?: (opts: { readonly search: Record<string, unknown> }) => unknown;
 }
@@ -572,13 +572,13 @@ A per-route option override applied by `cloneRouteTree`. Each field replaces the
 
 The override functions are intentionally loosely typed: an override rarely needs the real per-route context type, and matching it would require threading the route's generics through the override map. Write `loader: async () => data` or annotate the context parameter yourself when you need it.
 
-| Property         | Type                                                         | Description                                                           |
-| ---------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `loader`         | `(...args: never[]) => unknown`                              | Replace the route's `loader`, skipping the real one.                  |
-| `beforeLoad`     | `(...args: never[]) => unknown`                              | Replace the route's `beforeLoad` guard (e.g. to inject auth context). |
-| `context`        | `Record<string, unknown> \| ((...args: never[]) => unknown)` | Replace the route's `context` contribution.                           |
-| `validateSearch` | `(input: Record<string, unknown>) => unknown`                | Replace the route's `validateSearch`.                                 |
-| `loaderDeps`     | `(opts: { search: Record<string, unknown> }) => unknown`     | Replace the route's `loaderDeps`.                                     |
+| Property         | Type                                                     | Description                                                                                                        |
+| ---------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `loader`         | `(...args: never[]) => unknown`                          | Replace the route's `loader`, skipping the real one.                                                               |
+| `beforeLoad`     | `(...args: never[]) => unknown`                          | Replace the route's `beforeLoad` guard (e.g. to inject auth context).                                              |
+| `context`        | `(...args: never[]) => unknown`                          | Replace the route's `context` option (a function — return an object for a static bag: `context: () => ({ ... })`). |
+| `validateSearch` | `(input: Record<string, unknown>) => unknown`            | Replace the route's `validateSearch`.                                                                              |
+| `loaderDeps`     | `(opts: { search: Record<string, unknown> }) => unknown` | Replace the route's `loaderDeps`.                                                                                  |
 
 ---
 

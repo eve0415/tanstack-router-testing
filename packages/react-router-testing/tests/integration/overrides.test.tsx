@@ -51,7 +51,16 @@ const dashboardRoute = createRoute({
   loader: () => ({ widgets: 3 }),
 });
 
-const routeTree = rootRoute.addChildren([postRoute, adminRoute, loginRoute, authLayout.addChildren([dashboardRoute])]);
+const searchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/search',
+  validateSearch: (input: Record<string, unknown>) => ({ page: Number(input.page ?? 1) }),
+  loaderDeps: ({ search }: { search: { page: number } }) => ({ page: search.page }),
+  context: () => ({ base: 'real' }),
+  loader: ({ deps }: { deps: { page: number } }) => ({ page: deps.page }),
+});
+
+const routeTree = rootRoute.addChildren([postRoute, adminRoute, loginRoute, searchRoute, authLayout.addChildren([dashboardRoute])]);
 
 describe('createRouterHarness overrides (structural cloning)', () => {
   afterEach(() => {
@@ -93,6 +102,35 @@ describe('createRouterHarness overrides (structural cloning)', () => {
     expect(harness.getRouteContext('/_auth')).toMatchObject({ user: 'override-user' });
     expect(harness.getLoaderData('/_auth/dashboard')).toStrictEqual({ widgets: 3 });
     harness.cleanup();
+  });
+
+  it('overrides validateSearch, loaderDeps, and context (function) by id', async () => {
+    const harness = createRouterHarness({
+      routeTree,
+      initialEntries: ['/search?page=2'],
+      overrides: {
+        '/search': {
+          validateSearch: () => ({ page: 999 }),
+          loaderDeps: () => ({ page: 777 }),
+          context: () => ({ base: 'override' }),
+        },
+      },
+    });
+    await harness.load();
+    expect(harness.getSearch('/search')).toStrictEqual({ page: 999 });
+    expect(harness.getLoaderData('/search')).toStrictEqual({ page: 777 });
+    expect(harness.getRouteContext('/search')).toMatchObject({ base: 'override' });
+    harness.cleanup();
+  });
+
+  it('throws on an override targeting an unknown route id', () => {
+    expect(() =>
+      createRouterHarness({
+        routeTree,
+        initialEntries: ['/'],
+        overrides: { '/does-not-exist': { loader: () => ({}) } },
+      }),
+    ).toThrow(/unknown route id/);
   });
 
   it('leaves the source tree unmutated (leak-proof isolation)', async () => {

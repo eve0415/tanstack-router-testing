@@ -20,8 +20,12 @@ export interface RouteOverride {
   readonly loader?: (...args: never[]) => unknown;
   /** Replace the route's `beforeLoad` guard (e.g. to inject auth context). */
   readonly beforeLoad?: (...args: never[]) => unknown;
-  /** Replace the route's `context` contribution. */
-  readonly context?: Record<string, unknown> | ((...args: never[]) => unknown);
+  /**
+   * Replace the route's `context` option. It is a function, as in TanStack —
+   * the router calls it. To contribute a static bag of context, return it:
+   * `context: () => ({ foo: 1 })`.
+   */
+  readonly context?: (...args: never[]) => unknown;
   /** Replace the route's `validateSearch`. */
   readonly validateSearch?: (input: Record<string, unknown>) => unknown;
   /** Replace the route's `loaderDeps`. */
@@ -107,9 +111,11 @@ const cloneChild = (oldRoute: AnyRoute, parent: AnyRoute, overrides: RouteOverri
 
 /**
  * Deep-clone a TanStack Router tree, applying per-route option overrides keyed
- * by route id. The source tree is never mutated — every node is rebuilt via
- * `createRootRouteWithContext`/`createRoute`, so the clone can be mounted in an
- * isolated test router without leaking state back to the imported tree.
+ * by route id. The source tree's route *options* are never mutated — every node
+ * is rebuilt via `createRootRouteWithContext`/`createRoute` — so the clone can
+ * be mounted in an isolated test router without its overrides leaking back to
+ * the imported tree. (Cloning first populates the source's derived caches via
+ * `init()`; those recompute idempotently from the unchanged options.)
  *
  * @param rootRoute - Any route in the target tree, or its root. The enclosing
  *   root is located by walking `getParentRoute`; pass the root directly when
@@ -149,6 +155,17 @@ export const cloneRouteTree = (rootRoute: AnyRoute, overrides?: RouteOverrides):
   if (children !== undefined && children.length > 0) {
     newRoot.addChildren(children.map(child => cloneChild(child, newRoot, overrides, byId)));
   }
+
+  // Fail loud on a typo'd override id: a silently-ignored override reads as a
+  // green test against real behavior — the worst kind of no-op.
+  if (overrides) {
+    for (const id of Object.keys(overrides)) {
+      if (!byId.has(id)) {
+        throw new Error(`[tanstack-router-testing] cloneRouteTree: override targets unknown route id "${id}". Known ids: ${[...byId.keys()].join(', ')}`);
+      }
+    }
+  }
+
   return { root: newRoot, byId };
 };
 
