@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version-file: .node-version
+          node-version-file: package.json
           cache: pnpm
 
       - name: Install
@@ -50,7 +50,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version-file: .node-version
+          node-version-file: package.json
           cache: pnpm
 
       - name: Install
@@ -76,7 +76,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version-file: .node-version
+          node-version-file: package.json
           cache: pnpm
 
       - name: Install
@@ -99,7 +99,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version-file: .node-version
+          node-version-file: package.json
           cache: pnpm
 
       - name: Install
@@ -148,7 +148,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version-file: .node-version
+          node-version-file: package.json
           cache: pnpm
 
       - name: Install
