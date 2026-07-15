@@ -72,20 +72,20 @@
     "h3-v2": "npm:h3@2.0.1-rc.22"
   },
   "devDependencies": {
-    "@tanstack/react-router": "^1.170.8",
-    "@tanstack/react-start": "^1.168.13",
-    "@tanstack/router-plugin": "^1.168.11",
-    "@tanstack/start-client-core": "^1.170.4",
+    "@tanstack/react-router": "^1.170.18",
+    "@tanstack/react-start": "^1.168.28",
+    "@tanstack/router-plugin": "^1.168.20",
+    "@tanstack/start-client-core": "^1.170.14",
     "@tanstack/start-fn-stubs": "1.162.0",
-    "@tanstack/start-server-core": "^1.169.4",
-    "@tanstack/start-storage-context": "^1.167.8",
+    "@tanstack/start-server-core": "^1.169.17",
+    "@tanstack/start-storage-context": "^1.167.17",
     "@testing-library/react": "catalog:",
     "jsdom": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "tsdown": "catalog:",
-    "vite": "8.0.14",
-    "vitest": "catalog:"
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "@tanstack-router-testing/react-router-testing": "workspace:^",

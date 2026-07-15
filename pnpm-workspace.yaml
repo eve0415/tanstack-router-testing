@@ -2,36 +2,36 @@ linkWorkspacePackages: true
 preferWorkspacePackages: true
 
 catalog:
-  '@tanstack/history': '1.162.0'
-  '@tanstack/react-query': '5.100.14'
-  '@tanstack/react-router': '1.170.7'
-  '@tanstack/react-start': '1.168.10'
-  '@tanstack/router-core': '1.171.5'
-  '@testing-library/react': '16.3.2'
-  '@types/react': '19.2.15'
-  '@types/react-dom': '19.2.3'
-  '@typescript/native-preview': '7.0.0-dev.20260525.1'
-  jsdom: '29.1.1'
-  react: '19.2.6'
-  react-dom: '19.2.6'
-  tsdown: '0.22.0'
-  vitest: '4.1.7'
+  "@tanstack/history": "1.162.0"
+  "@tanstack/react-query": "5.101.2"
+  "@tanstack/react-router": "1.170.7"
+  "@tanstack/react-start": "1.168.10"
+  "@tanstack/router-core": "1.171.5"
+  "@testing-library/react": "16.3.2"
+  "@types/react": "19.2.17"
+  "@types/react-dom": "19.2.3"
+  "@typescript/native-preview": "7.0.0-dev.20260707.2"
+  jsdom: "29.1.1"
+  react: "19.2.7"
+  react-dom: "19.2.7"
+  tsdown: "0.22.7"
+  vitest: "4.1.10"
 
 # Vendored apps under vendor/ are intentionally NOT in the workspace:
 # they reference upstream TanStack packages via `workspace:*` that don't
 # exist here. Each vendored app resolves its own deps on-demand when the
 # harness targets it. See vendor/VENDOR.md.
 packages:
-  - 'packages/*'
-  - '!**/node_modules/**'
+  - "packages/*"
+  - "!**/node_modules/**"
 sharedWorkspaceLockfile: true
 publicHoistPattern:
-  - '*react*'
-  - '@tanstack/*'
-  - '@testing-library/*'
+  - "*react*"
+  - "@tanstack/*"
+  - "@testing-library/*"
 allowBuilds:
-  '@clerk/shared': false
-  '@firebase/util': false
-  '@parcel/watcher': false
+  "@clerk/shared": false
+  "@firebase/util": false
+  "@parcel/watcher": false
   esbuild: false
   protobufjs: false
