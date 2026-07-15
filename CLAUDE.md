@@ -16,8 +16,8 @@ Testing utilities for TanStack Router and TanStack Start. Monorepo with 4 packag
 - **Linter:** oxlint with type-aware checking via oxlint-tsgolint plugin
 - **Formatter:** oxfmt (single quotes, no arrow parens, 160 print width, sorted imports)
 - **Build:** tsdown (not tsup or esbuild)
-- **Package manager:** pnpm 10 with workspaces
-- **Node:** >=24.14.0
+- **Package manager:** pnpm 11 with workspaces (version pinned in `packageManager`)
+- **Node:** min `>=22.12.0` (`engines.node`, tracks TanStack Start's floor); dev/CI runtime pinned to `24.18.x` (`devEngines.runtime`)
 
 ## Commands
 
