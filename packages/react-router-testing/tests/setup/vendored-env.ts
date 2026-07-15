@@ -14,12 +14,14 @@ Object.defineProperty(globalThis, 'matchMedia', {
     (query: string) =>
       ({
         addEventListener: vi.fn<(type: string, listener: EventListenerOrEventListenerObject) => void>(),
+        // eslint-disable-next-line typescript/no-deprecated -- required member of the MediaQueryList interface being mocked
         addListener: vi.fn<(listener: EventListenerOrEventListenerObject) => void>(),
         dispatchEvent: vi.fn<(event: Event) => boolean>(),
         matches: false,
         media: query,
         onchange: null,
         removeEventListener: vi.fn<(type: string, listener: EventListenerOrEventListenerObject) => void>(),
+        // eslint-disable-next-line typescript/no-deprecated -- required member of the MediaQueryList interface being mocked
         removeListener: vi.fn<(listener: EventListenerOrEventListenerObject) => void>(),
       }) as MediaQueryList,
   ),

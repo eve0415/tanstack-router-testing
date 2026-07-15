@@ -112,5 +112,5 @@ export const createTestRouter = <
     defaultPendingMinMs: 0,
     ...(routerOptions as unknown as RouterConstructorOptions<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>),
     history,
-  }) as Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>;
+  });
 };

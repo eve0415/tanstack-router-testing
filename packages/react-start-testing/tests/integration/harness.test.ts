@@ -28,7 +28,7 @@ describe('react-start-testing harness integration', () => {
   });
 
   it('mockServerFn installs a callable-shaped mock and clearStartMocks clears it', () => {
-    const serverFn = ((_opts?: { data?: { x: number } }) => Promise.resolve('real')) as (opts?: { data?: { x: number } }) => Promise<string>;
+    const serverFn = (_opts?: { data?: { x: number } }) => Promise.resolve('real');
     registerServerFn(serverFn as unknown as AnyFn, () => Promise.resolve('real'));
 
     mockServerFn(serverFn, () => Promise.resolve('mock:0'));
