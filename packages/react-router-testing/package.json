@@ -53,15 +53,15 @@
     "@tanstack-router-testing/react-start-testing": "workspace:*",
     "@tanstack-router-testing/router-testing-core": "workspace:*",
     "@tanstack/history": "catalog:",
-    "@tanstack/react-query": "^5.101.2",
-    "@tanstack/react-router": "^1.170.18",
-    "@tanstack/router-core": "^1.171.15",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/router-core": "catalog:",
     "@testing-library/react": "catalog:",
     "jsdom": "catalog:",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tsdown": "catalog:",
-    "vitest": "^4.1.10"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@tanstack/history": "^1.0.0",

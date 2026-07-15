@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@tanstack/history": "catalog:",
-    "@tanstack/router-core": "^1.171.15",
+    "@tanstack/router-core": "catalog:",
     "tsdown": "catalog:",
     "vitest": "catalog:"
   },
