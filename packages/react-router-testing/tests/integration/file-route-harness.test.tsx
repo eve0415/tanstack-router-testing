@@ -72,9 +72,16 @@ const errorRoute = createRoute({
   errorComponent: () => <div>Error caught</div>,
 });
 
+const filterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/filter',
+  validateSearch: (input: Record<string, unknown>) => input,
+  component: () => <div>filter</div>,
+});
+
 describe('createRouterHarness with route option', () => {
   beforeAll(() => {
-    rootRoute.addChildren([postsLayout.addChildren([postDetail]), searchRoute, guardedRoute, loginRoute, errorRoute]);
+    rootRoute.addChildren([postsLayout.addChildren([postDetail]), searchRoute, guardedRoute, loginRoute, errorRoute, filterRoute]);
   });
 
   afterEach(cleanup);
@@ -141,6 +148,14 @@ describe('createRouterHarness with route option', () => {
     await h.load();
     expect(h.getSearch(searchRoute)).toStrictEqual({ page: 3 });
     expect(h.getLoaderData(searchRoute)).toStrictEqual({ page: 3 });
+    h.cleanup();
+  });
+
+  it('round-trips nested and array search values instead of "[object Object]"', async () => {
+    const search = { filter: { active: true, min: 5 }, tags: ['a', 'b'] };
+    const h = createRouterHarness({ route: filterRoute, search });
+    await h.load();
+    expect(h.getSearch(filterRoute)).toStrictEqual(search);
     h.cleanup();
   });
 

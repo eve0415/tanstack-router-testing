@@ -1,3 +1,4 @@
+import type { RouteOverrides } from './cloneRouteTree.ts';
 import type { CreateTestRouterOptions } from './createTestRouter.ts';
 import type { RouterHistory } from '@tanstack/history';
 import type { AnyRouter, Router } from '@tanstack/react-router';
@@ -5,7 +6,9 @@ import type { AnyRoute, AnyRouteMatch, NavigateOptions, RoutePaths, TrailingSlas
 import type { ComponentType, ReactElement, ReactNode } from 'react';
 
 import { RouterProvider } from '@tanstack/react-router';
+import { defaultStringifySearch } from '@tanstack/router-core';
 
+import { cloneRouteTree } from './cloneRouteTree.ts';
 import { createTestRouter } from './createTestRouter.ts';
 import { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
 import { trackHarness, untrackHarness } from './harnessRegistry.ts';
@@ -457,6 +460,17 @@ export function createRouterHarness<
 >(
   options: CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated> & {
     readonly queryClient?: object;
+    /**
+     * Per-route option overrides keyed by route id (e.g. `'/_authed'`).
+     *
+     * @remarks
+     * When provided, the route tree is structurally cloned and the named
+     * routes' `loader`/`beforeLoad`/`context`/`validateSearch`/`loaderDeps` are
+     * replaced on the clone — real loaders and guards still run for every other
+     * route. The source tree is never mutated, so it is safe even when several
+     * harnesses share one tree concurrently. See {@link RouteOverrides}.
+     */
+    readonly overrides?: RouteOverrides;
   },
 ): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -481,7 +495,13 @@ export function createRouterHarness(options: any): RouterHarness<any> {
 }
 
 const createTreeRouteHarness = (options: Record<string, unknown>): RouterHarness<AnyRouter> => {
-  const { queryClient, ...routerOptions } = options;
+  const { queryClient, overrides, ...routerOptions } = options;
+  if (overrides !== undefined) {
+    const { routeTree, ...rest } = routerOptions;
+    const { root } = cloneRouteTree(routeTree as AnyRoute, overrides as RouteOverrides);
+    const router = createTestRouter({ routeTree: root, ...rest } as CreateTestRouterOptions<AnyRoute>);
+    return buildHarness(router, queryClient as object | undefined);
+  }
   const router = createTestRouter(routerOptions as CreateTestRouterOptions<AnyRoute>);
   return buildHarness(router, queryClient as object | undefined);
 };
@@ -602,11 +622,9 @@ const buildUrlFromRoute = (route: AnyRoute, params?: Record<string, string>, sea
     return encodeURIComponent(value);
   });
   if (search && Object.keys(search).length > 0) {
-    const qs = new URLSearchParams();
-    for (const [key, value] of Object.entries(search)) {
-      qs.set(key, String(value));
-    }
-    url += `?${qs.toString()}`;
+    // Use the router's own serializer so nested/non-string search values round-trip
+    // (a plain `String(value)` produced `[object Object]`). Returns a leading `?`.
+    url += defaultStringifySearch(search);
   }
   return url;
 };

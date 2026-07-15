@@ -12,6 +12,7 @@
  */
 
 export { cleanupAllHarnesses } from './harnessRegistry.ts';
+export { type ClonedRouteTree, cloneRouteTree, type RouteOverride, type RouteOverrides } from './cloneRouteTree.ts';
 export { createRouterHarness, type FileRouteHarnessOptions, type RouterHarness } from './createRouterHarness.tsx';
 export { type CreateTestRouterMemoryOptions, type CreateTestRouterOptions, createTestRouter } from './createTestRouter.ts';
 export { computeFullPath, neuterAncestorLoaders, walkToRoot } from './fileRouteUtils.ts';
