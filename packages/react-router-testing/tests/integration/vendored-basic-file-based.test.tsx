@@ -51,4 +51,16 @@ describe('vendored integration: examples/react/basic-file-based', () => {
     expect(h.getLoaderData(PostRoute)).toStrictEqual(stubPost);
     h.cleanup();
   });
+
+  it('applies per-route overrides on a real file-route (.gen) tree via cloning', async () => {
+    const stubPost = { id: '42', title: 'CLONED', body: 'overridden' };
+    const h = createRouterHarness({
+      routeTree,
+      initialEntries: ['/posts/42'],
+      overrides: { '/posts/$postId': { loader: () => stubPost } },
+    });
+    await h.load();
+    expect(h.getLoaderData('/posts/$postId')).toStrictEqual(stubPost);
+    h.cleanup();
+  });
 });

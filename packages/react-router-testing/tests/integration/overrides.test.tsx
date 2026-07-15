@@ -33,7 +33,25 @@ const adminRoute = createRoute({
 
 const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: () => <h1>login</h1> });
 
-const routeTree = rootRoute.addChildren([postRoute, adminRoute, loginRoute]);
+// Pathless auth layout (no path, explicit id) guarding a child — the common `_authed` shape.
+const authLayout = createRoute({
+  id: '_auth',
+  getParentRoute: () => rootRoute,
+  beforeLoad: (ctx: unknown) => {
+    const { context } = ctx as { context: { auth: { user: string } | null } };
+    if (!context.auth) throw redirect({ to: '/login' });
+    return { user: context.auth.user };
+  },
+  component: () => <Outlet />,
+});
+
+const dashboardRoute = createRoute({
+  getParentRoute: () => authLayout,
+  path: '/dashboard',
+  loader: () => ({ widgets: 3 }),
+});
+
+const routeTree = rootRoute.addChildren([postRoute, adminRoute, loginRoute, authLayout.addChildren([dashboardRoute])]);
 
 describe('createRouterHarness overrides (structural cloning)', () => {
   afterEach(() => {
@@ -61,6 +79,19 @@ describe('createRouterHarness overrides (structural cloning)', () => {
     await harness.load();
     expect(harness.getRedirect).toBeDefined();
     expect(harness.getRouteContext('/admin')).toMatchObject({ admin: 'override-user' });
+    harness.cleanup();
+  });
+
+  it('clones pathless layout routes and overrides their beforeLoad by id', async () => {
+    const harness = createRouterHarness({
+      routeTree,
+      initialEntries: ['/dashboard'],
+      context: { auth: null }, // would redirect to /login without the override
+      overrides: { '/_auth': { beforeLoad: () => ({ user: 'override-user' }) } },
+    });
+    await harness.load();
+    expect(harness.getRouteContext('/_auth')).toMatchObject({ user: 'override-user' });
+    expect(harness.getLoaderData('/_auth/dashboard')).toStrictEqual({ widgets: 3 });
     harness.cleanup();
   });
 

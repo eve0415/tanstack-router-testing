@@ -81,13 +81,21 @@ const initSourceTree = (route: AnyRoute, counter: { i: number }): void => {
 };
 
 const cloneChild = (oldRoute: AnyRoute, parent: AnyRoute, overrides: RouteOverrides | undefined, byId: Map<string, AnyRoute>): AnyRoute => {
-  // Strip identity/parent-link options: the clone re-derives its id from the
-  // new parent + path, and its parent is re-linked to the cloned parent below.
-  // Reusing the original `id` would register two routes with the same id.
-  const { id: _id, getParentRoute: _getParentRoute, ...rest } = routeOpts(oldRoute);
+  // Strip the parent link (re-wired below) and, for routes that have a path,
+  // the id — a path route re-derives its id from path + cloned parent, and
+  // reusing the original id would collide. Pathless (layout) routes have no
+  // path to derive from, so their explicit id must be preserved or they
+  // collapse to `__root__`.
+  const { id: originalId, getParentRoute: _getParentRoute, ...rest } = routeOpts(oldRoute);
+  const isPathless = rest.path === undefined || rest.path === '';
   // `createRoute` (never `createFileRoute`): file routes register in TanStack's
   // global file-route registry by path, so re-cloning would collide.
-  const cloned = makeRoute({ ...rest, ...getOverrideFor(overrides, oldRoute.id), getParentRoute: () => parent });
+  const cloned = makeRoute({
+    ...rest,
+    ...(isPathless ? { id: originalId } : {}),
+    ...getOverrideFor(overrides, oldRoute.id),
+    getParentRoute: () => parent,
+  });
   byId.set(oldRoute.id, cloned);
 
   const children = childrenOf(oldRoute);
