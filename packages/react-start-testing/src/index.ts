@@ -9,6 +9,7 @@ export { type CallMiddlewareOptions, type CallMiddlewareResult, callMiddleware }
 export { clearStartMocks } from './clearStartMocks.ts';
 export { type AnyServerFn, mockServerFn, type ServerFnMock } from './mockServerFn.ts';
 export { type MockMiddlewareOptions, mockMiddleware } from './mockMiddleware.ts';
+export { type RenderRouteOptions, type RenderRouteResult, renderRoute, type ServerFnMockPair } from './renderRoute.tsx';
 export { runInStartEnv } from './isomorphic.ts';
 export { createRscTestRuntime, type RscRenderResult, type RscTestRuntime, type RscTestRuntimeOptions } from './rsc.tsx';
 export { createStartTestRuntime, type StartTestRuntime, type StartTestRuntimeOptions, type StartTestRunOptions } from './runtime.ts';

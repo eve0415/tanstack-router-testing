@@ -96,6 +96,7 @@
     "@tanstack/start-fn-stubs": "^1.0.0",
     "@tanstack/start-server-core": "^1.0.0",
     "@tanstack/start-storage-context": "^1.0.0",
+    "@testing-library/react": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vite": "^7.0.0 || ^8.0.0",
@@ -103,6 +104,9 @@
   },
   "peerDependenciesMeta": {
     "@tanstack-router-testing/react-router-testing": {
+      "optional": true
+    },
+    "@testing-library/react": {
       "optional": true
     },
     "vitest": {
