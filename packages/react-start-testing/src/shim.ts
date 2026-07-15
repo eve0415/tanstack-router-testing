@@ -120,7 +120,7 @@ const executeMiddleware = async (
             pathname,
             context: safeObjectMerge(toOptionalRecord(ctx.context), toOptionalRecord(userCtx.context)),
           };
-          const result = await callNextMiddleware(nextCtx as ServerFnMiddlewareResult);
+          const result = await callNextMiddleware(nextCtx);
           if (result.error) throw result.error;
 
           return {
@@ -152,8 +152,9 @@ const executeMiddleware = async (
         };
       }
 
-      if ('inputValidator' in nextMiddleware.options && nextMiddleware.options.inputValidator && env === 'server') {
-        ctx.data = await execValidator(nextMiddleware.options.inputValidator, ctx.data);
+      // Builders dual-write `validator`/`inputValidator`, so the canonical key is always present when a validator is set.
+      if ('validator' in nextMiddleware.options && nextMiddleware.options.validator && env === 'server') {
+        ctx.data = await execValidator(nextMiddleware.options.validator, ctx.data);
       }
 
       let middlewareFn: MiddlewareFn | undefined;
@@ -237,7 +238,7 @@ const createServerFnMiddleware = (options: ServerFnBaseOptions<any, any, any, an
   ({
     '~types': undefined,
     options: {
-      inputValidator: options.inputValidator,
+      validator: options.validator,
       client: async ({ next, sendContext, fetch, ...ctx }: ServerFnMiddlewareOptions & { next: NextFn }) => {
         const payload = {
           ...ctx,
@@ -256,7 +257,7 @@ const createServerFnMiddleware = (options: ServerFnBaseOptions<any, any, any, an
         return next({
           ...ctx,
           result,
-        } as ServerFnMiddlewareResult) as unknown as FunctionMiddlewareServerFnResult<any, any, any, any, any>;
+        }) as unknown as FunctionMiddlewareServerFnResult<any, any, any, any, any>;
       },
     },
   }) as unknown as AnyFunctionMiddleware;
@@ -307,9 +308,17 @@ export const createServerFn: CreateServerFnShim = ((
         (res as unknown as Record<symbol, unknown>)[TSS_SERVER_FUNCTION_FACTORY] = true;
         return res;
       },
+      validator: (validator: unknown) =>
+        createServerFn(undefined, {
+          ...nextOptions,
+          validator,
+          inputValidator: validator,
+        }),
+      // Deprecated upstream alias for `validator`; set both keys, mirroring `setValidator`.
       inputValidator: (inputValidator: unknown) =>
         createServerFn(undefined, {
           ...nextOptions,
+          validator: inputValidator,
           inputValidator,
         }),
       handler: (...args: unknown[]) => {
@@ -421,7 +430,7 @@ const createPhaseWrapper =
     const entry = getMiddlewareEntry(mw);
     const impl = phase === 'client' ? (entry?.mockClient ?? entry?.originalClient) : (entry?.mockServer ?? entry?.originalServer);
     if (!impl) return (ctx as { next?: AnyFn }).next?.();
-    return impl(ctx as never);
+    return impl(ctx);
   };
 
 export const createMiddleware: CreateMiddlewareShim = ((options: { type?: MiddlewareType } | undefined, __opts: Record<string, unknown> | undefined) => {
@@ -440,35 +449,40 @@ export const createMiddleware: CreateMiddlewareShim = ((options: { type?: Middle
       options: optionsWithWrappedPhases,
       middleware: (middlewares: unknown) =>
         createMiddleware(
-          {} as never,
+          {},
           {
             ...resolvedOptions,
             middleware: middlewares,
-          } as never,
+          },
         ),
+      validator: (validator: unknown) =>
+        createMiddleware({}, {
+          ...resolvedOptions,
+          validator,
+          inputValidator: validator,
+        } as never),
+      // Deprecated upstream alias for `validator`; set both keys, mirroring `setValidator`.
       inputValidator: (inputValidator: unknown) =>
-        createMiddleware(
-          {} as never,
-          {
-            ...resolvedOptions,
-            inputValidator,
-          } as never,
-        ),
+        createMiddleware({}, {
+          ...resolvedOptions,
+          validator: inputValidator,
+          inputValidator,
+        } as never),
       client: (client: AnyFn) =>
         createMiddleware(
-          {} as never,
+          {},
           {
             ...resolvedOptions,
             client,
-          } as never,
+          },
         ),
       server: (server: AnyFn) =>
         createMiddleware(
-          {} as never,
+          {},
           {
             ...resolvedOptions,
             server,
-          } as never,
+          },
         ),
     });
 

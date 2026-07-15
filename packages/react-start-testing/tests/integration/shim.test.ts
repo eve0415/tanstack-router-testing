@@ -23,10 +23,30 @@ describe('react-start-testing shim', () => {
 
   it('auto-registers createServerFn handlers for direct callable execution', async () => {
     const serverFn = createServerFn({ method: 'POST' })
+      .validator((input: { value: number }) => input)
+      .handler(({ data }) => ({ value: data.value * 2 }));
+
+    await expect(serverFn({ data: { value: 21 } })).resolves.toStrictEqual({ value: 42 });
+  });
+
+  it('supports the deprecated inputValidator alias on server functions', async () => {
+    const serverFn = createServerFn({ method: 'POST' })
+      // eslint-disable-next-line typescript/no-deprecated -- regression coverage for the deprecated alias, which upstream still ships
       .inputValidator((input: { value: number }) => input)
       .handler(({ data }) => ({ value: data.value * 2 }));
 
     await expect(serverFn({ data: { value: 21 } })).resolves.toStrictEqual({ value: 42 });
+  });
+
+  it('runs function-middleware validators declared via validator()', async () => {
+    const doubleMiddleware = createMiddleware({ type: 'function' })
+      .validator((input: { value: number }) => ({ value: input.value * 2 }))
+      .server(({ next, data }) => next({ context: { doubled: data.value } }));
+    const serverFn = createServerFn({ method: 'POST' })
+      .middleware([doubleMiddleware])
+      .handler(({ context }) => context.doubled);
+
+    await expect(serverFn({ data: { value: 21 } })).resolves.toBe(42);
   });
 
   it('applies mockServerFn to direct callable execution', async () => {
@@ -44,7 +64,7 @@ describe('react-start-testing shim', () => {
     );
     const serverFn = createServerFn()
       .middleware([authMiddleware])
-      .handler(({ context }) => (context as unknown as { userId: string }).userId);
+      .handler(({ context }) => context.userId);
 
     await expect(serverFn()).resolves.toBe('real-user');
 
