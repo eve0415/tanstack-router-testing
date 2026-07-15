@@ -556,6 +556,60 @@ Facade returned by `createRouterHarness` for testing routes, loaders, guards, re
 
 ---
 
+#### `RouteOverride`
+
+```ts
+interface RouteOverride {
+  readonly loader?: (...args: never[]) => unknown;
+  readonly beforeLoad?: (...args: never[]) => unknown;
+  readonly context?: Record<string, unknown> | ((...args: never[]) => unknown);
+  readonly validateSearch?: (input: Record<string, unknown>) => unknown;
+  readonly loaderDeps?: (opts: { readonly search: Record<string, unknown> }) => unknown;
+}
+```
+
+A per-route option override applied by `cloneRouteTree`. Each field replaces the corresponding option on the cloned route; fields left out keep the route's real behavior, so real loaders and guards still run everywhere except the routes you name.
+
+The override functions are intentionally loosely typed: an override rarely needs the real per-route context type, and matching it would require threading the route's generics through the override map. Write `loader: async () => data` or annotate the context parameter yourself when you need it.
+
+| Property         | Type                                                         | Description                                                           |
+| ---------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `loader`         | `(...args: never[]) => unknown`                              | Replace the route's `loader`, skipping the real one.                  |
+| `beforeLoad`     | `(...args: never[]) => unknown`                              | Replace the route's `beforeLoad` guard (e.g. to inject auth context). |
+| `context`        | `Record<string, unknown> \| ((...args: never[]) => unknown)` | Replace the route's `context` contribution.                           |
+| `validateSearch` | `(input: Record<string, unknown>) => unknown`                | Replace the route's `validateSearch`.                                 |
+| `loaderDeps`     | `(opts: { search: Record<string, unknown> }) => unknown`     | Replace the route's `loaderDeps`.                                     |
+
+---
+
+#### `RouteOverrides`
+
+```ts
+type RouteOverrides = Readonly<Record<string, RouteOverride>>;
+```
+
+Per-route overrides keyed by route id. Ids match the router's own ids -- `'__root__'` for the root, and the file-route id for everything else (e.g. `'/_authed'`, `'/posts/$postId'`).
+
+---
+
+#### `ClonedRouteTree`
+
+```ts
+interface ClonedRouteTree {
+  readonly root: AnyRoute;
+  readonly byId: ReadonlyMap<string, AnyRoute>;
+}
+```
+
+A structurally-cloned route tree. Returned by `cloneRouteTree`.
+
+| Property | Type                            | Description                                                                |
+| -------- | ------------------------------- | -------------------------------------------------------------------------- |
+| `root`   | `AnyRoute`                      | The cloned root route, ready to hand to `createRouter`/`createTestRouter`. |
+| `byId`   | `ReadonlyMap<string, AnyRoute>` | Cloned routes indexed by their original route id.                          |
+
+---
+
 ### SSR Types (via `./ssr` subpath)
 
 Import from `@tanstack-router-testing/react-router-testing/ssr`.
@@ -703,6 +757,7 @@ function createRouterHarness<
 >(
   options: CreateTestRouterOptions<TRouteTree, TTrailingSlash, TDefaultStructural, TDehydrated> & {
     readonly queryClient?: object;
+    readonly overrides?: RouteOverrides;
   },
 ): RouterHarness<Router<TRouteTree, TTrailingSlash, TDefaultStructural, RouterHistory, TDehydrated>>;
 ```
@@ -710,6 +765,8 @@ function createRouterHarness<
 Create a `RouterHarness` containing a fully wired test router and a React provider component. Combines `createTestRouter` with a `RouterProvider` wrapper (and an optional `QueryClientProvider`), giving tests a single entry point for rendering, navigating, and asserting against route state.
 
 When `route` is provided, the harness automatically walks to the root, neuters ancestor loaders for isolation (preserving `beforeLoad` for context cascading), and computes the initial URL from `params`/`search`.
+
+When `overrides` is provided (route tree overload only), the route tree is structurally cloned via `cloneRouteTree` and the named routes' `loader`/`beforeLoad`/`context`/`validateSearch`/`loaderDeps` are replaced on the clone -- real loaders and guards still run for every other route. The source tree is never mutated, so it is safe even when several harnesses share one tree concurrently. See `RouteOverrides`.
 
 **Parameters (file route overload):**
 
@@ -726,9 +783,10 @@ When `route` is provided, the harness automatically walks to the root, neuters a
 
 All options from `CreateTestRouterOptions` plus:
 
-| Parameter     | Type     | Description                                                                                                                     |
-| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `queryClient` | `object` | Optional `QueryClient` instance. When provided, wraps `RouterProvider` with `QueryClientProvider` from `@tanstack/react-query`. |
+| Parameter     | Type             | Description                                                                                                                     |
+| ------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `queryClient` | `object`         | Optional `QueryClient` instance. When provided, wraps `RouterProvider` with `QueryClientProvider` from `@tanstack/react-query`. |
+| `overrides`   | `RouteOverrides` | Per-route option overrides keyed by route id. The tree is structurally cloned via `cloneRouteTree` before mounting. Optional.   |
 
 **Returns:** `RouterHarness<...>`
 
@@ -767,6 +825,37 @@ await harness.load();
 
 expect(harness.getLoaderData('/posts/$postId')).toEqual({ id: 7 });
 harness.cleanup();
+```
+
+---
+
+#### `cloneRouteTree(rootRoute, overrides?)`
+
+```ts
+function cloneRouteTree(rootRoute: AnyRoute, overrides?: RouteOverrides): ClonedRouteTree;
+```
+
+Deep-clone a TanStack Router tree, applying per-route option overrides keyed by route id. The source tree is never mutated -- every node is rebuilt via `createRootRouteWithContext`/`createRoute`, so the clone can be mounted in an isolated test router without leaking state back to the imported tree.
+
+Cloning is leak-proof by construction: unlike mutate-and-restore isolation, it is safe even when several routers share the same source tree at once (e.g. `test.concurrent`).
+
+**Parameters:**
+
+| Parameter   | Type             | Description                                                                                                                                            |
+| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `rootRoute` | `AnyRoute`       | Any route in the target tree, or its root. The enclosing root is located by walking `getParentRoute`; pass the root directly when you already have it. |
+| `overrides` | `RouteOverrides` | Optional per-route overrides keyed by route id (see `RouteOverrides`). Real loaders/guards run for every route you omit.                               |
+
+**Returns:** `ClonedRouteTree` -- the cloned tree: a fresh root plus a map from the original route ids to their cloned counterparts.
+
+**Example:**
+
+```ts
+const { root } = cloneRouteTree(routeTree, {
+  '/_authed': { beforeLoad: () => ({ user: stubUser }) },
+  '/posts/$postId': { loader: async () => ({ id: 7, title: 'Mock' }) },
+});
+const router = createTestRouter({ routeTree: root, initialEntries: ['/posts/7'] });
 ```
 
 ---
@@ -888,6 +977,62 @@ type ServerFnMock<TFn extends AnyServerFn> = (...args: Parameters<TFn>) => Retur
 ```
 
 The mock implementation signature for a server function of type `TFn`. Full generic inference is preserved so autocomplete works identically to the real call.
+
+---
+
+#### `ServerFnMockPair<TFn>`
+
+```ts
+type ServerFnMockPair<TFn extends AnyServerFn = AnyServerFn> = readonly [TFn, ServerFnMock<TFn>];
+```
+
+A `[serverFn, mockImplementation]` pair installed before the route renders. Used by `renderRoute`'s `serverFnMocks` option.
+
+---
+
+#### `RenderRouteOptions`
+
+```ts
+interface RenderRouteOptions {
+  readonly routeTree: AnyRoute;
+  readonly initialEntries?: readonly string[];
+  readonly initialIndex?: number;
+  readonly context?: Record<string, unknown>;
+  readonly overrides?: RouteOverrides;
+  readonly serverFnMocks?: readonly ServerFnMockPair[];
+  readonly queryClient?: object;
+}
+```
+
+Options for `renderRoute`.
+
+| Property         | Type                          | Default | Description                                                                                                                                                                                      |
+| ---------------- | ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `routeTree`      | `AnyRoute`                    | --      | The route tree to mount.                                                                                                                                                                         |
+| `initialEntries` | `readonly string[]`           | `['/']` | Initial navigation entries; the last one is active.                                                                                                                                              |
+| `initialIndex`   | `number`                      | --      | Index into `initialEntries` to start at.                                                                                                                                                         |
+| `context`        | `Record<string, unknown>`     | --      | Router context passed to `beforeLoad`/`loader`.                                                                                                                                                  |
+| `overrides`      | `RouteOverrides`              | --      | Per-route option overrides keyed by route id. The tree is structurally cloned, so the source tree is never mutated. See `RouteOverrides` (from `@tanstack-router-testing/react-router-testing`). |
+| `serverFnMocks`  | `readonly ServerFnMockPair[]` | --      | `[serverFn, mock]` pairs installed via `mockServerFn` before render and disposed on `unmount`.                                                                                                   |
+| `queryClient`    | `object`                      | --      | Optional `QueryClient` for `@tanstack/react-query` integration.                                                                                                                                  |
+
+---
+
+#### `RenderRouteResult`
+
+```ts
+interface RenderRouteResult extends RenderResult {
+  readonly harness: RouterHarness<AnyRouter>;
+}
+```
+
+Result of `renderRoute`: the full React Testing Library `RenderResult` plus the underlying `RouterHarness` (from `@tanstack-router-testing/react-router-testing`).
+
+| Property  | Type                       | Description                                                                 |
+| --------- | -------------------------- | --------------------------------------------------------------------------- |
+| `harness` | `RouterHarness<AnyRouter>` | The router harness backing the render, for state assertions and navigation. |
+
+All members from RTL's `RenderResult` are also available.
 
 ---
 
@@ -1103,6 +1248,43 @@ const dispose = mockMiddleware(authMiddleware, {
 
 // ... run your test ...
 dispose();
+```
+
+---
+
+#### `renderRoute(options)`
+
+```ts
+function renderRoute(options: RenderRouteOptions): Promise<RenderRouteResult>;
+```
+
+Mount a route tree at a location with server-function mocks and per-route overrides -- the router, mocks, render, and load happen in one call. Wires `createRouterHarness` (with `overrides`), installs each `serverFnMocks` pair via `mockServerFn`, loads the router, and renders it through React Testing Library. It is the declarative counterpart to hand-composing `createTestRouter` + `mockServerFn` + `render`.
+
+The returned `unmount` disposes the installed mocks and tears down the harness in addition to unmounting the DOM; it is idempotent, so it composes safely with the standard `clearStartMocks` / `cleanupAllHarnesses` teardown.
+
+**Parameters:**
+
+| Parameter | Type                 | Description                                                                  |
+| --------- | -------------------- | ---------------------------------------------------------------------------- |
+| `options` | `RenderRouteOptions` | Describes the tree, location, context, overrides, and server-function mocks. |
+
+**Returns:** `Promise<RenderRouteResult>` -- RTL queries plus the `harness`. Requires `@testing-library/react` to be installed.
+
+**Example:**
+
+```tsx
+import { routeTree } from './routeTree.gen';
+import { listOrders } from './server/orders';
+
+const screen = await renderRoute({
+  routeTree,
+  initialEntries: ['/orders/42'],
+  context: { auth: stubAuth },
+  overrides: { '/_authed': { beforeLoad: () => ({ user: stubUser }) } },
+  serverFnMocks: [[listOrders, async () => [{ id: 1, total: 42 }]]],
+});
+await screen.findByText('Order 42');
+expect(screen.harness.getLoaderData('/orders/$id')).toBeDefined();
 ```
 
 ---
