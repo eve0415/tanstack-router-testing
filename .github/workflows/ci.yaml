@@ -112,7 +112,6 @@ jobs:
         run: |
           pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --passWithNoTests
           pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --passWithNoTests
-          pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --passWithNoTests
           pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --passWithNoTests
 
       - name: Vendored parity
@@ -163,7 +162,6 @@ jobs:
           {
             pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
             pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
-            pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text
             pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests
           } 2>&1 | tee coverage.txt
           {

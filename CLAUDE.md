@@ -9,7 +9,6 @@ Testing utilities for TanStack Router and TanStack Start. Monorepo with 4 packag
 - **react-router-testing** — `createRouterHarness`, `createTestRouter`, SSR harness, file route utilities (`computeFullPath`, `neuterAncestorLoaders`, `walkToRoot`)
 - **react-start-testing** — `mockServerFn`, `mockMiddleware`, `createStartTestRuntime`, `createRscTestRuntime`, `clearStartMocks`, `runInStartEnv`, Vite plugin (`src/vite.ts`)
 - **router-testing-core** — internal registry/env runtime (transitive dependency)
-- **react-start-testing-storybook** — Storybook decorator for Start
 
 ## Tooling
 

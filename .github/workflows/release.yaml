@@ -50,8 +50,7 @@ jobs:
           for pkg in \
             packages/router-testing-core \
             packages/react-start-testing \
-            packages/react-router-testing \
-            packages/react-start-testing-storybook; do
+            packages/react-router-testing; do
             name=$(jq -r .name "$pkg/package.json")
             version=$(jq -r .version "$pkg/package.json")
             view_out=$(npm view "$name@$version" version 2>&1) && {

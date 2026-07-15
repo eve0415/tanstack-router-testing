@@ -32,7 +32,7 @@ function resolveVersion(input: string): string {
 
 const version = resolveVersion(arg);
 
-const packages = ['packages/router-testing-core', 'packages/react-router-testing', 'packages/react-start-testing', 'packages/react-start-testing-storybook'];
+const packages = ['packages/router-testing-core', 'packages/react-router-testing', 'packages/react-start-testing'];
 
 for (const pkg of packages) {
   const pkgJsonPath = resolve(root, pkg, 'package.json');

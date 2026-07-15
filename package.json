@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm --filter=\"./packages/*\" run build",
     "test:unit": "pnpm -r run test:unit",
-    "test:unit:core": "pnpm --filter=@tanstack-router-testing/router-testing-core run test:unit && pnpm --filter=@tanstack-router-testing/react-start-testing run test:unit && pnpm --filter=@tanstack-router-testing/react-start-testing-storybook run test:unit && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --passWithNoTests",
+    "test:unit:core": "pnpm --filter=@tanstack-router-testing/router-testing-core run test:unit && pnpm --filter=@tanstack-router-testing/react-start-testing run test:unit && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --passWithNoTests",
     "test:unit:vendored:examples": "pnpm run test:vendored:prepare && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/examples-react --passWithNoTests",
     "test:unit:vendored:e2e-router": "pnpm run test:vendored:prepare && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/e2e-react-router --passWithNoTests",
     "test:unit:vendored:e2e-start": "pnpm run test:vendored:prepare && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/vendored/e2e-react-start --passWithNoTests",
@@ -19,7 +19,7 @@
     "test:types": "pnpm -r run test:types",
     "lint": "oxlint --report-unused-disable-directives --fix --fix-suggestions --ignore-path .oxlintignore && oxfmt",
     "lint:check": "oxlint --report-unused-disable-directives --ignore-path .oxlintignore && oxfmt --check",
-    "test:unit:coverage": "pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing-storybook exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests",
+    "test:unit:coverage": "pnpm --filter=@tanstack-router-testing/router-testing-core exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-start-testing exec vitest run --coverage --coverage.reporter=json-summary --coverage.reporter=text && pnpm --filter=@tanstack-router-testing/react-router-testing exec vitest run tests/integration src --coverage --coverage.reporter=json-summary --coverage.reporter=text --passWithNoTests",
     "clean": "pnpm -r exec rm -rf dist node_modules .tsbuildinfo",
     "bump": "node scripts/bump-version.ts"
   },
@@ -84,14 +84,14 @@
     "zod": "4.4.3",
     "zustand": "5.0.14"
   },
-  "engines": {
-    "node": ">=24.15.0"
-  },
   "devEngines": {
     "runtime": {
       "name": "node",
       "version": "24.18.x"
     }
+  },
+  "engines": {
+    "node": ">=24.15.0"
   },
   "packageManager": "pnpm@11.11.0"
 }
