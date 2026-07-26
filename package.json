@@ -24,7 +24,7 @@
     "bump": "node scripts/bump-version.ts"
   },
   "devDependencies": {
-    "@auth/core": "0.41.2",
+    "@auth/core": "0.41.3",
     "@clerk/tanstack-react-start": "1.4.17",
     "@convex-dev/react-query": "0.1.0",
     "@emotion/cache": "11.14.0",
